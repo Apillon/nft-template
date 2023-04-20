@@ -19,158 +19,10 @@
       rel="stylesheet"
     />
     <link href="./style/style.css" rel="stylesheet" />
-    <script src="./abi.js" type="application/javascript"></script>
-    <script>
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const nftAddress = "0xee182f008eb8127c9358b0d517d1e6aaf5060290";
-
-      $(async function () {
-        const chainId = await ethereum.request({ method: "eth_chainId" });
-        if (chainId != 0x507) {
-          await ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainId: "0x507",
-                rpcUrls: ["https://rpc.api.moonbase.moonbeam.network/"],
-                chainName: "Moonbase",
-                nativeCurrency: {
-                  name: "DEV",
-                  symbol: "DEV",
-                  decimals: 18,
-                },
-                blockExplorerUrls: ["https://moonbase.moonscan.io/"],
-              },
-            ],
-          });
-        }
-
-        await ethereum.request({ method: "eth_requestAccounts" });
-        await loadNFTs();
-      });
-
-      async function loadNFTs() {
-        const contract = new ethers.Contract(nftAddress, nftAbi, provider);
-        const address = await provider.getSigner().getAddress();
-        console.log(address);
-
-        const balance = await contract.balanceOf(address);
-        console.log(balance);
-
-        if (balance.toBigInt() > 0) {
-          $("#nfts").html("");
-        } else {
-          $("#nfts").html("<div class='col-sm-12'>No NFTs</div>");
-        }
-
-        for (let i = 0; i < balance.toBigInt(); i++) {
-          const id = await contract.tokenOfOwnerByIndex(address, i);
-          console.log(id);
-
-          const url = await contract.tokenURI(id.toBigInt());
-          console.log(url);
-
-          let metadata = null;
-          try {
-            metadata = await $.getJSON(url);
-          } catch (e) {
-            console.log(e);
-            metadata = {
-              name: "",
-              description: "",
-              image: "",
-            };
-          }
-          $("#nfts").append(`
-            <div id="nft${id}" class="col-sm-3">
-              <h3>${metadata.name || `#${id}`}</h3>
-              <p>${metadata.description}</p>
-              <img class="img-fluid" src="${metadata.image}" />
-            </div>
-          `);
-        }
-      }
-
-      function interpolate(str, params) {
-        let names = Object.keys(params);
-        let vals = Object.values(params);
-        console.log(str);
-        console.log(params);
-        console.log(names);
-        console.log(vals);
-        return new Function(...names, `return \`${str}\`;`)(...vals);
-      }
-
-      // window.onload = function (event) {
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipfs/QmdeehwzFug2a5uLATB6app23QFV1mkKcynREfKJWcSJqB?filename=1.json"
-      //   );
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipfs/QmXQ2CVr3A9CmQcAwnAe26aWijyRMxj1jSbFkSYGDcdWFL?filename=2.json"
-      //   );
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8jq2cshxfo5a87sgnhonbp9mlyto8466oz66gahaiaijruzwv2n/1.json"
-      //   );
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8jq2cshxfo5a87sgnhonbp9mlyto8466oz66gahaiaijruzwv2n/2.json"
-      //   );
-
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/1.json"
-      //   );
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/10.json"
-      //   );
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/2.json"
-      //   );
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/7.json"
-      //   );
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/8.json"
-      //   );
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/9.json"
-      //   );
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/6.json"
-      //   );
-
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8npzcl1emt7zvb094uqht0ika3b5ftem0sa32obkuwidkbd524v/1.json"
-      //   );
-      //   fetchNft(
-      //     "https://ipfs2.apillon.io/ipns/k2k4r8npzcl1emt7zvb094uqht0ika3b5ftem0sa32obkuwidkbd524v/2.json"
-      //   );
-      // };
-      // function fetchNft(url) {
-      //   const nfts = document.querySelector("#nfts");
-      //   const nftListItem = document.querySelector("#nftListItem");
-
-      //   fetch(url)
-      //     .then(function (response) {
-      //       // The API call was successful!
-      //       if (response.ok) {
-      //         return response.json();
-      //       } else {
-      //         return Promise.reject(response);
-      //       }
-      //     })
-      //     .then(function (response) {
-      //       const resData = {
-      //         name: response.name,
-      //         description: response.description,
-      //         image: response.image,
-      //       };
-      //       nfts.innerHTML += interpolate(nftListItem.innerHTML, resData);
-      //     })
-      //     .catch(function (err) {
-      //       // There was an error
-      //       console.warn("Something went wrong.", err);
-      //     });
-      // }
-    </script>
+    <script src="./js/abi.js" type="application/javascript"></script>
+    <script src="./js/env.js" type="application/javascript"></script>
+    <script src="./js/script.js" type="application/javascript"></script>
+    <script></script>
   </head>
   <body>
     <div class="container">
@@ -188,6 +40,12 @@
           <img src="images/header.svg" />
         </div>
       </div>
+      <div>
+        <button onclick="loadAllNFTs();">All nfts</button>
+        <button onclick="loadMyNFTs();">My nfts</button>
+      </div>
+      <div id="collection"></div>
+      <div id="drop"></div>
       <div class="grid" id="nfts"></div>
     </div>
     <template id="nftListItem">
