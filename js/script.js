@@ -7,6 +7,7 @@ $(async function () {
   if (currentChain != chainId) {
     try {
       await switchChain();
+      location.reload();
     } catch (e) {
       await addChain();
     }
@@ -27,31 +28,81 @@ function loadInfo() {
         `;
 
   if (info.drop) {
+    const dropStartTimestamp = info.dropStart.toNumber() * 1000;
+
     content = `${content}
           <b> Price: </b>${ethers.utils.formatEther(info.price)}</br>
           `;
     if (info.totalSupply.eq(info.maxSupply)) {
-      $("#drop").html("Sold out!");
+      $("#drop").html("<h3>Sold out!</h3>");
+    } else if (dropStartTimestamp > Date.now()) {
+      // The data/time we want to countdown to
+      const dropStartDate = new Date(dropStartTimestamp);
+      countdown(dropStartDate);
+
+      // Run myfunc every second
+      var myfunc = setInterval(function () {
+        countdown(dropStartDate);
+        // Display the message when countdown is over
+        var timeleft = dropStartDate - new Date().getTime();
+        if (timeleft < 0) {
+          clearInterval(myfunc);
+          renderMint();
+        }
+      }, 1000);
     } else {
-      // TODO: add countdown if drop not yet available info.dropStart (unix timestamp in seconds) else show buy
-      $("#drop").html(`
-              <input id="amount" type="number" min="1" max="5" />
-              <button onclick="mint()">Mint</button>
-            `);
+      renderMint();
     }
   }
   $("#collection").html(content);
+  $("#actions").show();
+}
+
+function countdown(date) {
+  var now = new Date().getTime();
+  var timeleft = date - now;
+
+  // Calculating the days, hours, minutes and seconds left
+  var days = Math.floor(timeleft / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((timeleft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((timeleft % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((timeleft % (1000 * 60)) / 1000);
+
+  $("#drop").html(`
+    <b> Drop: </b>${date.toDateString()} ${date.toLocaleTimeString()} </br>
+    ${days} <b>d </b>
+    ${hours} <b>h </b>
+    ${minutes} <b>m </b>
+    ${seconds} <b>s </b>
+  `);
+}
+function renderMint() {
+  $("#drop").html(`
+    <div class="amount">
+      <label for="amount">Number of tokens (1-5):</label>
+      <input id="amount" type="number" min="1" max="5" value="1" />
+    </div>
+    <button id="btnMint" onclick="mint()">Mint</button>
+  `);
 }
 
 async function mint() {
-  const nft = new ethers.Contract(nftAddress, nftAbi, provider).connect(
-    provider.getSigner()
-  );
+  btnLoader($("#btnMint"), true);
+  try {
+    const nft = new ethers.Contract(nftAddress, nftAbi, provider).connect(
+      provider.getSigner()
+    );
 
-  const address = await provider.getSigner().getAddress();
-  const amount = $("#amount").val();
-  const value = info.price.mul(ethers.BigNumber.from(amount)); // 0.1
-  const tx = await nft.mint(address, amount, { value });
+    const address = await provider.getSigner().getAddress();
+    const amount = $("#amount").val();
+    const value = info.price.mul(ethers.BigNumber.from(amount)); // 0.1
+    const tx = await nft.mint(address, amount, { value });
+
+    btnLoader($("#btnMint"), false);
+  } catch (error) {
+    console.log(error);
+    btnLoader($("#btnMint"), false);
+  }
 }
 
 async function getCollectionInfo() {
@@ -102,65 +153,50 @@ async function switchChain() {
 }
 
 async function loadAllNFTs() {
+  btnLoader($("#btnAllNFTs"), true);
   const balance = info.totalSupply;
 
-  if (balance.toBigInt() > 0) {
-    $("#nfts").html("");
-  } else {
-    $("#nfts").html("<div class='col-sm-12'>No NFTs</div>");
-  }
-
-  for (let i = 0; i < balance.toBigInt(); i++) {
-    const id = await contract.tokenByIndex(i);
-    console.log(id);
-
-    const url = await contract.tokenURI(id.toBigInt());
-    console.log(url);
-
-    let metadata = null;
-    try {
-      metadata = await $.getJSON(url);
-    } catch (e) {
-      console.log(e);
-      metadata = {
-        name: "",
-        description: "",
-        image: "",
-      };
-    }
-    $("#nfts").append(`
-            <div id="nft${id}" class="col-sm-3">
-              <h3>${metadata.name || `#${id}`}</h3>
-              <p>${metadata.description}</p>
-              <img class="img-fluid" src="${metadata.image}" />
-            </div>
-          `);
-  }
+  await renderNFTs(balance);
+  btnLoader($("#btnAllNFTs"), false);
 }
 
 async function loadMyNFTs() {
+  btnLoader($("#myNFTs"), true);
   const address = await provider.getSigner().getAddress();
-  console.log(address);
-
   const balance = await contract.balanceOf(address);
-  console.log(balance);
 
+  await renderNFTs(balance, address);
+
+  btnLoader($("#myNFTs"), false);
+}
+
+async function renderNFTs(balance, address = null) {
   if (balance.toBigInt() > 0) {
     $("#nfts").html("");
   } else {
-    $("#nfts").html("<div class='col-sm-12'>No NFTs</div>");
+    $("#nfts").html('<h2 class="text-center">No NFTs</h2>');
+    return;
   }
 
   for (let i = 0; i < balance.toBigInt(); i++) {
-    const id = await contract.tokenOfOwnerByIndex(address, i);
-    console.log(id);
-
+    const id = address
+      ? await contract.tokenOfOwnerByIndex(address, i)
+      : await contract.tokenByIndex(i);
     const url = await contract.tokenURI(id.toBigInt());
-    console.log(url);
 
     let metadata = null;
     try {
       metadata = await $.getJSON(url);
+
+      $("#nfts").append(`
+        <div class="box br" id="nft_${id}">
+          <img src="${metadata.image}" alt="${metadata.name}" />
+          <div class="box-content">
+            <h3>${metadata.name || `#${id}`}</h3>
+            <p>${metadata.description}</p>
+          </div>
+        </div>
+      `);
     } catch (e) {
       console.log(e);
       metadata = {
@@ -168,93 +204,40 @@ async function loadMyNFTs() {
         description: "",
         image: "",
       };
+      $("#nfts").html(
+        '<h3 class="text-center">Apologies, we were unable to load NFTs at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
+      );
     }
-    $("#nfts").append(`
-            <div id="nft${id}" class="col-sm-3">
-              <h3>${metadata.name || `#${id}`}</h3>
-              <p>${metadata.description}</p>
-              <img class="img-fluid" src="${metadata.image}" />
-            </div>
-          `);
   }
 }
 
-function interpolate(str, params) {
-  let names = Object.keys(params);
-  let vals = Object.values(params);
-  console.log(str);
-  console.log(params);
-  console.log(names);
-  console.log(vals);
-  return new Function(...names, `return \`${str}\`;`)(...vals);
+function btnLoader(el, loading) {
+  if (loading) {
+    el.addClass("loading");
+    el.attr("data-text", el.text());
+    el.html(`
+      <svg
+      class="spinner"
+      style="
+        margin: -${12}px 0 0 -${12}px;
+        width: ${24}px;
+        height: ${24}px;
+      "
+      viewBox="0 0 50 50"
+    >
+      <circle
+        cx="25"
+        cy="25"
+        r="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        class="path"
+      ></circle>
+    </svg>
+    `);
+  } else {
+    el.removeClass("loading");
+    el.html(el.attr("data-text"));
+  }
 }
-
-// window.onload = function (event) {
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipfs/QmdeehwzFug2a5uLATB6app23QFV1mkKcynREfKJWcSJqB?filename=1.json"
-//   );
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipfs/QmXQ2CVr3A9CmQcAwnAe26aWijyRMxj1jSbFkSYGDcdWFL?filename=2.json"
-//   );
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8jq2cshxfo5a87sgnhonbp9mlyto8466oz66gahaiaijruzwv2n/1.json"
-//   );
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8jq2cshxfo5a87sgnhonbp9mlyto8466oz66gahaiaijruzwv2n/2.json"
-//   );
-
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/1.json"
-//   );
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/10.json"
-//   );
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/2.json"
-//   );
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/7.json"
-//   );
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/8.json"
-//   );
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/9.json"
-//   );
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8pany6qcxun1p7wg6nyx3goex2ae8vlfsl0c8e3iivv35v956zz/6.json"
-//   );
-
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8npzcl1emt7zvb094uqht0ika3b5ftem0sa32obkuwidkbd524v/1.json"
-//   );
-//   fetchNft(
-//     "https://ipfs2.apillon.io/ipns/k2k4r8npzcl1emt7zvb094uqht0ika3b5ftem0sa32obkuwidkbd524v/2.json"
-//   );
-// };
-// function fetchNft(url) {
-//   const nfts = document.querySelector("#nfts");
-//   const nftListItem = document.querySelector("#nftListItem");
-
-//   fetch(url)
-//     .then(function (response) {
-//       // The API call was successful!
-//       if (response.ok) {
-//         return response.json();
-//       } else {
-//         return Promise.reject(response);
-//       }
-//     })
-//     .then(function (response) {
-//       const resData = {
-//         name: response.name,
-//         description: response.description,
-//         image: response.image,
-//       };
-//       nfts.innerHTML += interpolate(nftListItem.innerHTML, resData);
-//     })
-//     .catch(function (err) {
-//       // There was an error
-//       console.warn("Something went wrong.", err);
-//     });
-// }

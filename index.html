@@ -32,31 +32,26 @@
             A matter of minutes. And zero developing costs. Want to build your
             own NFT collection?
           </h1>
-          <a href="https://apillon.io/" class="builders" target="_blank"
-            >Build with Apillon</a
-          >
+          <a href="https://apillon.io/" class="builders" target="_blank">
+            Build with Apillon
+          </a>
         </div>
         <div class="header-r">
           <img src="images/header.svg" />
         </div>
       </div>
-      <div>
-        <button onclick="loadAllNFTs();">All nfts</button>
-        <button onclick="loadMyNFTs();">My nfts</button>
+      <div class="box collection br text-center">
+        <div id="collection"></div>
+        <div class="drop" id="drop"></div>
       </div>
-      <div id="collection"></div>
-      <div id="drop"></div>
-      <div class="grid" id="nfts"></div>
-    </div>
-    <template id="nftListItem">
-      <div class="box br">
-        <img src="${image}" alt="${name}" />
-        <div class="box-content">
-          <h3>${name}</h3>
-          <p>${description}</p>
-          <button>Buy</button>
+      <div id="actions" style="display: none">
+        <h2 class="text-center">Show NFTs:</h2>
+        <div class="actions">
+          <button id="btnAllNFTs" onclick="loadAllNFTs();">All nfts</button>
+          <button id="myNFTs" onclick="loadMyNFTs();">My nfts</button>
         </div>
       </div>
-    </template>
+      <div class="grid" id="nfts"></div>
+    </div>
   </body>
 </html>
