@@ -16,7 +16,7 @@ npx http-server
 
 ## Deploy to Apillon Hosting
 
-To deploy your this website to Apillon Hosting you should:
+To deploy your NFT website to Apillon Hosting you should:
 
 1. Clone this repository and [configure](#configure) it to your needs.
 2. If not already, register to [Apillon.io](https://app.apillon.io)
@@ -28,3 +28,5 @@ To deploy your this website to Apillon Hosting you should:
     * APILLON_API_SECRET : your previously created API secret
 
 Now everything should be ready. When you will push to master branch, your website should start deploy to Apillon IPFS hosting. Monitor progress on [Apillon.io](https://app.apillon.io) dashboard. After some time you'll be able to get IPNS url and also setup your own domain.
+
+You can change behavior of the automatic deployment by editing [/.github/workflows/deploy.yml](/.github/workflows/deploy.yml).
