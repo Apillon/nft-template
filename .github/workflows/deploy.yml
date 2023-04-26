@@ -17,6 +17,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+      
+      - name: Create dist folder
+        run: mkdir -p dist
+          
+      - name: Copy files
+        run: |
+          cp *.html dist/
+          cp -r images dist/
+          cp -r style dist/
+          cp -r js dist/
 
       - name: Deploy website
         env:
