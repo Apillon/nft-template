@@ -1,0 +1,26 @@
+name: Deploy Website
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Deploy website
+        env:
+          APILLON_API_KEY: ${{ secrets.APILLON_API_KEY }}
+          APILLON_API_SECRET: ${{ secrets.APILLON_API_SECRET }}
+          WEBSITE_UUID: ${{ secrets.WEBSITE_UUID }}
+        run: npx --yes @apillon/cli hosting deploy-website ./dist --uuid $WEBSITE_UUID --key $APILLON_API_KEY --secret $APILLON_API_SECRET
