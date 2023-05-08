@@ -23,7 +23,7 @@ To deploy your NFT website to Apillon Hosting you should:
 3. Log in to Apillon console and create new Hosting bucket inside your project.
 4. In settings, create an API KEY with storage permissions. Write down API key and API secret.
 5. In your github repository setup actions secrets (variables)
-    * WEBSITE_UUID : copy UUID from hosting bucket on Appilon dashboard
+    * WEBSITE_UUID : copy UUID from hosting bucket on Apillon dashboard
     * APILLON_API_KEY : your previously created API key
     * APILLON_API_SECRET : your previously created API secret
 
