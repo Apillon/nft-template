@@ -1,2 +1,4 @@
-const nftAddress = "0xee182f008eb8127c9358b0d517d1e6aaf5060290";
+const nftAddress = ""; // Paste the address of the NFT collection.
+// uncomment the chain you are using:
 const chainId = "0x507"; // Moonbase
+// const chainId = "0x504"; // Moonbeam
