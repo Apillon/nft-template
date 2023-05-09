@@ -127,22 +127,42 @@ async function getCurrentChain() {
 }
 
 async function addChain() {
-  await ethereum.request({
-    method: "wallet_addEthereumChain",
-    params: [
-      {
-        chainId,
-        rpcUrls: ["https://rpc.api.moonbase.moonbeam.network/"],
-        chainName: "Moonbase",
-        nativeCurrency: {
-          name: "DEV",
-          symbol: "DEV",
-          decimals: 18,
+  if (chainId == 0x507) {
+    // moonbase
+    await ethereum.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId,
+          rpcUrls: ["https://rpc.api.moonbase.moonbeam.network/"],
+          chainName: "Moonbase",
+          nativeCurrency: {
+            name: "DEV",
+            symbol: "DEV",
+            decimals: 18,
+          },
+          blockExplorerUrls: ["https://moonbase.moonscan.io/"],
         },
-        blockExplorerUrls: ["https://moonbase.moonscan.io/"],
-      },
-    ],
-  });
+      ],
+    });
+  } else if (chainId == 0x504) {
+    // moonbeam
+    await ethereum.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId,
+          rpcUrls: ["https://rpc.api.moonbeam.network/"],
+          chainName: "Moonbeam",
+          nativeCurrency: {
+            name: "GLMR",
+            symbol: "GLMR",
+            decimals: 18,
+          },
+          blockExplorerUrls: ["https://moonscan.io/"],
+        },
+      ],
+  }
 }
 
 async function switchChain() {
