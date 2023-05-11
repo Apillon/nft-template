@@ -162,6 +162,7 @@ async function addChain() {
           blockExplorerUrls: ["https://moonscan.io/"],
         },
       ],
+    });
   }
 }
 
