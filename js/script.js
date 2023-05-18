@@ -163,6 +163,24 @@ async function addChain() {
         },
       ],
     });
+  } else if (chainId == 0x250) {
+    // moonbeam
+    await ethereum.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId,
+          rpcUrls: ["https://evm.astar.network/"],
+          chainName: "Astar",
+          nativeCurrency: {
+            name: "ASTR",
+            symbol: "ASTR",
+            decimals: 18,
+          },
+          blockExplorerUrls: ["https://blockscout.com/astar"],
+        },
+      ],
+    });
   }
 }
 
