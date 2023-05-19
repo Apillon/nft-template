@@ -124,6 +124,15 @@ button:hover {
   animation-name: bounceIn;
   animation-duration: 50s;
 }
+button svg {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+button span {
+  padding-left: 12px;
+}
 .btn-connect-wrapper {
   position: absolute;
   top: 10px;

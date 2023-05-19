@@ -1,6 +1,8 @@
 let provider = null;
 let contract = null;
 let info = {};
+const iconWallet =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none"><path d="M4 3C2.89 3 2 3.9 2 5V19C2 19.5304 2.21071 20.0391 2.58579 20.4142C2.96086 20.7893 3.46957 21 4 21H18C18.5304 21 19.0391 20.7893 19.4142 20.4142C19.7893 20.0391 20 19.5304 20 19V16.72C20.59 16.37 21 15.74 21 15V9C21 8.26 20.59 7.63 20 7.28V5C20 4.46957 19.7893 3.96086 19.4142 3.58579C19.0391 3.21071 18.5304 3 18 3H4ZM4 5H18V7H12C11.4696 7 10.9609 7.21071 10.5858 7.58579C10.2107 7.96086 10 8.46957 10 9V15C10 15.5304 10.2107 16.0391 10.5858 16.4142C10.9609 16.7893 11.4696 17 12 17H18V19H4V5ZM12 9H19V15H12V9ZM15 10.5C14.6022 10.5 14.2206 10.658 13.9393 10.9393C13.658 11.2206 13.5 11.6022 13.5 12C13.5 12.3978 13.658 12.7794 13.9393 13.0607C14.2206 13.342 14.6022 13.5 15 13.5C15.3978 13.5 15.7794 13.342 16.0607 13.0607C16.342 12.7794 16.5 12.3978 16.5 12C16.5 11.6022 16.342 11.2206 16.0607 10.9393C15.7794 10.658 15.3978 10.5 15 10.5Z" fill="currentColor"/></svg>';
 
 function initProvider() {
   provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -9,7 +11,7 @@ function initProvider() {
 
 async function connectWallet() {
   let currentChain = null;
-  $("#drop").html("");
+  $("#connectError").html("");
 
   try {
     initProvider();
@@ -29,6 +31,12 @@ async function connectWallet() {
       await addChain();
     }
   }
+
+  /** Btn onConected: Show Wallet address */
+  const address = await provider.getSigner().getAddress();
+  $("#btnConnect").html(
+    iconWallet + "<span>" + address.slice(0, 11) + "</span>"
+  );
 
   await ethereum.request({ method: "eth_requestAccounts" });
 
