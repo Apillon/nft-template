@@ -1,23 +1,80 @@
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const contract = new ethers.Contract(nftAddress, nftAbi, provider);
+let provider = null;
+let contract = null;
 let info = {};
 
-$(async function () {
-  const currentChain = await getCurrentChain();
+function initProvider() {
+  provider = new ethers.providers.Web3Provider(window.ethereum);
+  contract = new ethers.Contract(nftAddress, nftAbi, provider);
+}
+
+async function connectWallet() {
+  let currentChain = null;
+  $("#drop").html("");
+
+  try {
+    initProvider();
+    currentChain = await getCurrentChain();
+  } catch (e) {
+    $("#connectError").html(metamaskNotSupportedMessage());
+    return;
+  }
+
   if (currentChain != chainId) {
     try {
       await switchChain();
-      location.reload();
+      // location.reload();
+      initProvider();
+      currentChain = await getCurrentChain();
     } catch (e) {
       await addChain();
     }
   }
 
   await ethereum.request({ method: "eth_requestAccounts" });
-  info = await getCollectionInfo();
+
+  try {
+    info = await getCollectionInfo();
+  } catch (e) {
+    console.warn(e);
+    $("#connectError").html("Error: Invalid NFT collection");
+    return;
+  }
+
   loadInfo();
   await loadAllNFTs();
-});
+}
+
+function browserName() {
+  let userAgent = navigator.userAgent;
+  let browserName = "";
+
+  if (userAgent.match(/chrome|chromium|crios/i)) {
+    browserName = "chrome";
+  } else if (userAgent.match(/firefox|fxios/i)) {
+    browserName = "firefox";
+  } else if (userAgent.match(/safari/i)) {
+    browserName = "safari";
+  } else if (userAgent.match(/opr\//i)) {
+    browserName = "opera";
+  } else if (userAgent.match(/edg/i)) {
+    browserName = "edge";
+  } else if (userAgent.match(/brave/i)) {
+    browserName = "brave";
+  } else {
+    browserName = "No browser detection";
+  }
+  return browserName;
+}
+function browserSupportsMetaMask() {
+  return ["chrome", "firefox", "brave", "edge", "opera"].includes(
+    browserName()
+  );
+}
+function metamaskNotSupportedMessage() {
+  return browserSupportsMetaMask()
+    ? "You need MetaMask extension to connect wallet!"
+    : "Your browser does not support MetaMask, please use another browser!";
+}
 
 function loadInfo() {
   let content = `
@@ -212,8 +269,13 @@ async function loadMyNFTs() {
 async function renderNFTs(balance, address = null) {
   if (balance.toBigInt() > 0) {
     $("#nfts").html("");
+  } else if (address) {
+    $("#nfts").html('<h2 class="text-center">You don\'t have any NFTs</h2>');
+    return;
   } else {
-    $("#nfts").html('<h2 class="text-center">No NFTs</h2>');
+    $("#nfts").html(
+      '<h2 class="text-center">No NFTs, they must be minted first.</h2>'
+    );
     return;
   }
 
@@ -252,8 +314,8 @@ async function renderNFTs(balance, address = null) {
 
 function btnLoader(el, loading) {
   if (loading) {
-    el.addClass("loading");
     el.attr("data-text", el.text());
+    el.addClass("loading");
     el.html(`
       <svg
       class="spinner"
