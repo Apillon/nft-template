@@ -33,12 +33,11 @@ async function connectWallet() {
   }
 
   /** Btn onConected: Show Wallet address */
+  await ethereum.request({ method: "eth_requestAccounts" });
   const address = await provider.getSigner().getAddress();
   $("#btnConnect").html(
     iconWallet + "<span>" + address.slice(0, 11) + "</span>"
   );
-
-  await ethereum.request({ method: "eth_requestAccounts" });
 
   try {
     info = await getCollectionInfo();
