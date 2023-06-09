@@ -288,13 +288,13 @@ async function renderNFTs(balance, address = null) {
   }
 
   for (let i = 0; i < balance.toBigInt(); i++) {
-    const id = address
-      ? await contract.tokenOfOwnerByIndex(address, i)
-      : await contract.tokenByIndex(i);
-    const url = await contract.tokenURI(id.toBigInt());
-
     let metadata = null;
     try {
+      const id = address
+        ? await contract.tokenOfOwnerByIndex(address, i)
+        : await contract.tokenByIndex(i);
+      const url = await contract.tokenURI(id.toBigInt());
+
       metadata = await $.getJSON(url);
 
       $("#nfts").append(`
@@ -313,9 +313,11 @@ async function renderNFTs(balance, address = null) {
         description: "",
         image: "",
       };
-      $("#nfts").html(
-        '<h3 class="text-center">Apologies, we were unable to load NFTs at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
-      );
+      if (i == 0) {
+        $("#nfts").html(
+          '<h3 class="text-center">Apologies, we were unable to load NFTs at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
+        );
+      }
     }
   }
 }
