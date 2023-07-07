@@ -6,7 +6,9 @@ const iconWallet =
 
 function initProvider() {
   provider = new ethers.providers.Web3Provider(window.ethereum);
-  contract = new ethers.Contract(nftAddress, nftAbi, provider);
+  //TODO: should we automatically recognize?
+  const contractAbi = useNestableNfts ? nestableNftAbi : nftAbi;
+  contract = new ethers.Contract(nftAddress, contractAbi, provider);
 }
 
 async function connectWallet() {
@@ -153,7 +155,7 @@ function renderMint() {
 async function mint() {
   btnLoader($("#btnMint"), true);
   try {
-    const nft = new ethers.Contract(nftAddress, nftAbi, provider).connect(
+    const nft = contract.connect(
       provider.getSigner()
     );
 
@@ -180,9 +182,9 @@ async function getCollectionInfo() {
   info["drop"] = await contract.isDrop();
   info["dropStart"] = await contract.dropStart();
   info["reserve"] = await contract.reserve();
-  info["price"] = await contract.price();
-  info["royaltiesFees"] = await contract.royaltiesFees();
-  info["royaltiesAddress"] = await contract.royaltiesAddress();
+  info["price"] = await contract.pricePerMint();
+  info["royaltiesFees"] = useNestableNfts ? await contract.getRoyaltyPercentage() : await contract.royaltiesFees();
+  info["royaltiesAddress"] = useNestableNfts ? await contract.getRoyaltyRecipient() : await contract.royaltiesAddress();
   return info;
 }
 
@@ -258,8 +260,12 @@ async function switchChain() {
 async function loadAllNFTs() {
   btnLoader($("#btnAllNFTs"), true);
   const balance = info.totalSupply;
+  if(useNestableNfts) {
+    await renderAllNestableNfts(balance);
+  } else {
+    await renderGenericNFTs(balance);
+  }
 
-  await renderNFTs(balance);
   btnLoader($("#btnAllNFTs"), false);
 }
 
@@ -267,23 +273,21 @@ async function loadMyNFTs() {
   btnLoader($("#myNFTs"), true);
   const address = await provider.getSigner().getAddress();
   const balance = await contract.balanceOf(address);
-
-  await renderNFTs(balance, address);
+  if(useNestableNfts) {
+    await renderNestableNftsForUser(address);
+  } else {
+    await renderGenericNFTs(balance, address);
+  }
 
   btnLoader($("#myNFTs"), false);
 }
 
-async function renderNFTs(balance, address = null) {
-  if (balance.toBigInt() > 0) {
-    $("#nfts").html("");
-  } else if (address) {
-    $("#nfts").html('<h2 class="text-center">You don\'t have any NFTs</h2>');
-    return;
-  } else {
-    $("#nfts").html(
-      '<h2 class="text-center">No NFTs, they must be minted first.</h2>'
-    );
-    return;
+//GENERIC NFTS
+
+async function renderGenericNFTs(balance, address = null) {
+  const nftsExist = nftExistsCheckAndErrorRender(balance.toBigInt(), address)
+  if(!nftsExist) {
+    return
   }
 
   for (let i = 0; i < balance.toBigInt(); i++) {
@@ -292,11 +296,93 @@ async function renderNFTs(balance, address = null) {
       : await contract.tokenByIndex(i);
     const url = await contract.tokenURI(id.toBigInt());
 
-    let metadata = null;
-    try {
-      metadata = await $.getJSON(url);
+    await renderNft(id, url)
+  }
+}
 
-      $("#nfts").append(`
+
+// NESTABLE NFTs
+async function renderAllNestableNfts(totalSupply) {
+  for (let i = 1; i <= totalSupply; i++) {
+    const tokenUri = await contract.tokenURI(i);
+
+    await renderNft(i, tokenUri)
+  }
+}
+async function renderNestableNftsForUser(address=null) {
+  const nestableTokenIds = await contract.walletOfOwner(address);
+  const nftsExist = nftExistsCheckAndErrorRender(nestableTokenIds.length, address)
+  if(!nftsExist) {
+    return
+  }
+
+  for (let i = 0; i < nestableTokenIds.length; i++) {
+    const nestableTokenId = nestableTokenIds[i];
+    const tokenUri = await contract.tokenURI(nestableTokenId);
+
+    await renderNft(nestableTokenId, tokenUri)
+  }
+}
+
+//TODO: implement
+async function ownerNestMint(receiverAddress, quantity, destinationId) {
+  const nft = contract.connect(provider.getSigner());
+  try {
+    await nft.nestTransferFrom(receiverAddress, quantity, destinationId)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function nestTransferFrom(fromAddress, toAddress, tokenId, destinationId, data) {
+  const nft = contract.connect(provider.getSigner());
+  try {
+    await nft.nestTransferFrom(fromAddress, toAddress, tokenId, destinationId, data)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function acceptChild(parentId, childIndex, childAddress, childId) {
+  const nft = contract.connect(provider.getSigner());
+  try {
+    await nft.acceptChild(parentId, childIndex, childAddress, childId)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function transferChild(tokenId, toAddress, destinationId, childIndex, childAddress, childId, isPending, data) {
+  const nft = contract.connect(provider.getSigner());
+  try {
+    await nft.transferChild(tokenId, toAddress, destinationId, childIndex, childAddress, childId, isPending, data)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+// GENERIC RENDERERS
+
+function nftExistsCheckAndErrorRender(nftCount, address) {
+  if (nftCount > 0) {
+    $("#nfts").html("");
+    return true;
+  } else if (address) {
+    $("#nfts").html('<h2 class="text-center">You don\'t have any NFTs</h2>');
+  } else {
+    $("#nfts").html(
+      '<h2 class="text-center">No NFTs, they must be minted first.</h2>'
+    );
+  }
+  return false;
+}
+
+async function renderNft(id, url) {
+  let metadata = null;
+  try {
+    metadata = await $.getJSON(url);
+
+    $('#nfts').append(`
         <div class="box br" id="nft_${id}">
           <img src="${metadata.image}" alt="${metadata.name}" />
           <div class="box-content">
@@ -305,17 +391,16 @@ async function renderNFTs(balance, address = null) {
           </div>
         </div>
       `);
-    } catch (e) {
-      console.log(e);
-      metadata = {
-        name: "",
-        description: "",
-        image: "",
-      };
-      $("#nfts").html(
-        '<h3 class="text-center">Apologies, we were unable to load NFTs at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
-      );
-    }
+  } catch (e) {
+    console.log(e);
+    metadata = {
+      name: '',
+      description: '',
+      image: '',
+    };
+    $('#nfts').html(
+      '<h3 class="text-center">Apologies, we were unable to load NFTs at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
+    );
   }
 }
 
