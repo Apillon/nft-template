@@ -272,10 +272,11 @@ async function loadAllNFTs() {
 async function loadMyNFTs() {
   btnLoader($("#myNFTs"), true);
   const address = await provider.getSigner().getAddress();
-  const balance = await contract.balanceOf(address);
+
   if(useNestableNfts) {
     await renderNestableNftsForUser(address);
   } else {
+    const balance = await contract.balanceOf(address);
     await renderGenericNFTs(balance, address);
   }
 
@@ -303,13 +304,17 @@ async function renderGenericNFTs(balance, address = null) {
 
 // NESTABLE NFTs
 async function renderAllNestableNfts(totalSupply) {
+  const nftsExist = nftExistsCheckAndErrorRender(totalSupply)
+  if(!nftsExist) {
+    return
+  }
   for (let i = 1; i <= totalSupply; i++) {
     const tokenUri = await contract.tokenURI(i);
 
     await renderNft(i, tokenUri)
   }
 }
-async function renderNestableNftsForUser(address=null) {
+async function renderNestableNftsForUser(address) {
   const nestableTokenIds = await contract.walletOfOwner(address);
   const nftsExist = nftExistsCheckAndErrorRender(nestableTokenIds.length, address)
   if(!nftsExist) {
@@ -363,7 +368,7 @@ async function transferChild(tokenId, toAddress, destinationId, childIndex, chil
 
 // GENERIC RENDERERS
 
-function nftExistsCheckAndErrorRender(nftCount, address) {
+function nftExistsCheckAndErrorRender(nftCount, address=null) {
   if (nftCount > 0) {
     $("#nfts").html("");
     return true;
