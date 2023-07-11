@@ -6,9 +6,7 @@ const iconWallet =
 
 function initProvider() {
   provider = new ethers.providers.Web3Provider(window.ethereum);
-  //TODO: should we automatically recognize?
-  const contractAbi = useNestableNfts ? nestableNftAbi : nftAbi;
-  nftContract = new ethers.Contract(nftAddress, contractAbi, provider);
+  nftContract = getNftContract(nftAddress);
 }
 
 async function connectWallet() {
@@ -184,12 +182,8 @@ async function getCollectionInfo() {
   info["dropStart"] = await nftContract.dropStart();
   info["reserve"] = await nftContract.reserve();
   info["price"] = await nftContract.pricePerMint();
-  info["royaltiesFees"] = useNestableNfts
-    ? await nftContract.getRoyaltyPercentage()
-    : await nftContract.royaltiesFees();
-  info["royaltiesAddress"] = useNestableNfts
-    ? await nftContract.getRoyaltyRecipient()
-    : await nftContract.royaltiesAddress();
+  info["royaltiesFees"] = await nftContract.getRoyaltyPercentage();
+  info["royaltiesAddress"] = await nftContract.getRoyaltyRecipient();
   return info;
 }
 
@@ -304,6 +298,7 @@ const CHILD_ADDRESS = "0x491D27f7F320AbA14b72bc3597a962fD90268943";
 async function childMintWrapper() {
   await childMint(CHILD_ADDRESS, 1);
 }
+
 async function childNestMintWrapper() {
   await childNestMint(CHILD_ADDRESS, 1, 1);
 }
@@ -340,12 +335,12 @@ async function isTokenNestable(contract) {
   }
 }
 
-function getNestableNftContract(tokenAddress) {
-  return new ethers.Contract(tokenAddress, nestableNftAbi, provider);
+function getNftContract(tokenAddress) {
+  return new ethers.Contract(tokenAddress, nftAbi, provider);
 }
 
 async function childMint(tokenAddress, quantity) {
-  const childNftContract = getNestableNftContract(tokenAddress)
+  const childNftContract = getNftContract(tokenAddress);
   const isNestable = await isTokenNestable(childNftContract);
   if (!isNestable) {
     console.error("Child token is not nestable");
@@ -358,18 +353,14 @@ async function childMint(tokenAddress, quantity) {
   try {
     await childNftContract
       .connect(signer)
-      .mint(
-        signerAddress,
-        quantity,
-        { value }
-      );
+      .mint(signerAddress, quantity, { value });
   } catch (e) {
     console.log(e);
   }
 }
 
 async function childNestMint(tokenAddress, quantity, destinationId) {
-  const childNftContract = getNestableNftContract(tokenAddress)
+  const childNftContract = getNftContract(tokenAddress);
   const isNestable = await isTokenNestable(childNftContract);
   if (!isNestable) {
     console.error("Child token is not nestable");
@@ -381,12 +372,7 @@ async function childNestMint(tokenAddress, quantity, destinationId) {
   try {
     await childNftContract
       .connect(signer)
-      .nestMint(
-        nftContract.address,
-        quantity,
-        destinationId,
-        { value }
-      );
+      .nestMint(nftContract.address, quantity, destinationId, { value });
   } catch (e) {
     console.log(e);
   }
@@ -410,7 +396,7 @@ async function nestTransferFrom(
   destinationId,
   data,
 ) {
-  const childNftContract = getNestableNftContract(tokenAddress)
+  const childNftContract = getNftContract(tokenAddress);
   const isNestable = await isTokenNestable(childNftContract);
   if (!isNestable) {
     console.error("Child token is not nestable");
