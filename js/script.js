@@ -4,9 +4,6 @@ let info = {};
 const iconWallet =
   '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none"><path d="M4 3C2.89 3 2 3.9 2 5V19C2 19.5304 2.21071 20.0391 2.58579 20.4142C2.96086 20.7893 3.46957 21 4 21H18C18.5304 21 19.0391 20.7893 19.4142 20.4142C19.7893 20.0391 20 19.5304 20 19V16.72C20.59 16.37 21 15.74 21 15V9C21 8.26 20.59 7.63 20 7.28V5C20 4.46957 19.7893 3.96086 19.4142 3.58579C19.0391 3.21071 18.5304 3 18 3H4ZM4 5H18V7H12C11.4696 7 10.9609 7.21071 10.5858 7.58579C10.2107 7.96086 10 8.46957 10 9V15C10 15.5304 10.2107 16.0391 10.5858 16.4142C10.9609 16.7893 11.4696 17 12 17H18V19H4V5ZM12 9H19V15H12V9ZM15 10.5C14.6022 10.5 14.2206 10.658 13.9393 10.9393C13.658 11.2206 13.5 11.6022 13.5 12C13.5 12.3978 13.658 12.7794 13.9393 13.0607C14.2206 13.342 14.6022 13.5 15 13.5C15.3978 13.5 15.7794 13.342 16.0607 13.0607C16.342 12.7794 16.5 12.3978 16.5 12C16.5 11.6022 16.342 11.2206 16.0607 10.9393C15.7794 10.658 15.3978 10.5 15 10.5Z" fill="currentColor"/></svg>';
 
-//child address is provided by user
-const CHILD_ADDRESS = "0x2A9ae3FbcceD1023E93A9F33C53DFdbe123181Ca";
-
 function initProvider() {
   provider = new ethers.providers.Web3Provider(window.ethereum);
   //TODO: should we automatically recognize?
@@ -268,11 +265,7 @@ async function switchChain() {
 async function loadAllNFTs() {
   btnLoader($("#btnAllNFTs"), true);
   const balance = info.totalSupply;
-  if (useNestableNfts) {
-    await renderAllNestableNfts(balance);
-  } else {
-    await renderGenericNFTs(balance);
-  }
+  await showNFTs(balance);
 
   btnLoader($("#btnAllNFTs"), false);
 }
@@ -280,20 +273,15 @@ async function loadAllNFTs() {
 async function loadMyNFTs() {
   btnLoader($("#myNFTs"), true);
   const address = await provider.getSigner().getAddress();
-
-  if (useNestableNfts) {
-    await renderNestableNftsForUser(address);
-  } else {
-    const balance = await nftContract.balanceOf(address);
-    await renderGenericNFTs(balance, address);
-  }
+  const balance = await nftContract.balanceOf(address);
+  await showNFTs(balance, address);
 
   btnLoader($("#myNFTs"), false);
 }
 
 //GENERIC NFTS
 
-async function renderGenericNFTs(balance, address = null) {
+async function showNFTs(balance, address = null) {
   const nftsExist = nftExistsCheckAndErrorRender(balance.toBigInt(), address);
   if (!nftsExist) {
     return;
@@ -309,9 +297,17 @@ async function renderGenericNFTs(balance, address = null) {
   }
 }
 
+//TODO: implement nestable NFTs on UI
+//child address is provided by user
+const CHILD_ADDRESS = "0x491D27f7F320AbA14b72bc3597a962fD90268943";
 
+async function childMintWrapper() {
+  await childMint(CHILD_ADDRESS, 1);
+}
+async function childNestMintWrapper() {
+  await childNestMint(CHILD_ADDRESS, 1, 1);
+}
 
-//TODO: implement nestable NFTs
 async function nestTransferFromWrapper() {
   const tx = await nestTransferFrom(
     CHILD_ADDRESS,
@@ -324,7 +320,7 @@ async function nestTransferFromWrapper() {
 }
 
 async function acceptChildWrapper() {
-  await acceptChild(1, 1, CHILD_ADDRESS, 1);
+  await acceptChild(1, 0, CHILD_ADDRESS, 2);
 }
 
 async function transferChildWrapper() {
@@ -344,26 +340,69 @@ async function isTokenNestable(contract) {
   }
 }
 
-
-async function nestMintWrapper() {
-  await nestMint(CHILD_ADDRESS, 1, 1)
+function getNestableNftContract(tokenAddress) {
+  return new ethers.Contract(tokenAddress, nestableNftAbi, provider);
 }
 
-async function nestMint(tokenAddress, quantity, destinationId) {
-  const childNftContract = new ethers.Contract(
-    tokenAddress,
-    nestableNftAbi,
-    provider,
-  );
+async function childMint(tokenAddress, quantity) {
+  const childNftContract = getNestableNftContract(tokenAddress)
+  const isNestable = await isTokenNestable(childNftContract);
+  if (!isNestable) {
+    console.error("Child token is not nestable");
+    return;
+  }
   const signer = provider.getSigner();
+  const signerAddress = await signer.getAddress();
+  const price = await nftContract.pricePerMint();
+  const value = price.mul(ethers.BigNumber.from(quantity));
   try {
     await childNftContract
       .connect(signer)
-      .nestMint(nftContract.address, quantity, destinationId);
+      .mint(
+        signerAddress,
+        quantity,
+        { value }
+      );
   } catch (e) {
     console.log(e);
   }
 }
+
+async function childNestMint(tokenAddress, quantity, destinationId) {
+  const childNftContract = getNestableNftContract(tokenAddress)
+  const isNestable = await isTokenNestable(childNftContract);
+  if (!isNestable) {
+    console.error("Child token is not nestable");
+    return;
+  }
+  const signer = provider.getSigner();
+  const price = await nftContract.pricePerMint();
+  const value = price.mul(ethers.BigNumber.from(quantity));
+  try {
+    await childNftContract
+      .connect(signer)
+      .nestMint(
+        nftContract.address,
+        quantity,
+        destinationId,
+        { value }
+      );
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function acceptChild(parentId, childIndex, childAddress, childId) {
+  const signer = provider.getSigner();
+  try {
+    await nftContract
+      .connect(signer)
+      .acceptChild(parentId, childIndex, childAddress, childId);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 async function nestTransferFrom(
   tokenAddress,
   toAddress,
@@ -371,11 +410,7 @@ async function nestTransferFrom(
   destinationId,
   data,
 ) {
-  const childNftContract = new ethers.Contract(
-    tokenAddress,
-    nestableNftAbi,
-    provider,
-  );
+  const childNftContract = getNestableNftContract(tokenAddress)
   const isNestable = await isTokenNestable(childNftContract);
   if (!isNestable) {
     console.error("Child token is not nestable");
@@ -388,17 +423,6 @@ async function nestTransferFrom(
     await childNftContract
       .connect(signer)
       .nestTransferFrom(signerAddress, toAddress, tokenId, destinationId, data);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function acceptChild(parentId, childIndex, childAddress, childId) {
-  const signer = provider.getSigner();
-  try {
-    await nftContract
-      .connect(signer)
-      .acceptChild(parentId, childIndex, childAddress, childId);
   } catch (e) {
     console.log(e);
   }
@@ -430,37 +454,6 @@ async function transferChild(
       );
   } catch (e) {
     console.log(e);
-  }
-}
-
-// NESTABLE NFTs RENDERERS
-async function renderAllNestableNfts(totalSupply) {
-  const nftsExist = nftExistsCheckAndErrorRender(totalSupply);
-  if (!nftsExist) {
-    return;
-  }
-  for (let i = 1; i <= totalSupply; i++) {
-    const tokenUri = await nftContract.tokenURI(i);
-
-    await renderNft(i, tokenUri);
-  }
-}
-
-async function renderNestableNftsForUser(address) {
-  const nestableTokenIds = await nftContract.walletOfOwner(address);
-  const nftsExist = nftExistsCheckAndErrorRender(
-    nestableTokenIds.length,
-    address,
-  );
-  if (!nftsExist) {
-    return;
-  }
-
-  for (let i = 0; i < nestableTokenIds.length; i++) {
-    const nestableTokenId = nestableTokenIds[i];
-    const tokenUri = await nftContract.tokenURI(nestableTokenId);
-
-    await renderNft(nestableTokenId, tokenUri);
   }
 }
 
