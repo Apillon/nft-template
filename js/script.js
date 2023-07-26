@@ -49,6 +49,13 @@ async function connectWallet() {
 
   loadInfo();
   await loadAllNFTs();
+
+  // disable approve and reject buttons if there are no children
+  const children = await pendingChildrenOf(1);
+  if(children.length <= 0) {
+    $("#acceptChild").prop('disabled', true);
+    $("#rejectAllChildren").prop('disabled', true);
+  }
 }
 
 function browserName() {
@@ -293,7 +300,7 @@ async function showNFTs(balance, address = null) {
 
 //TODO: implement nestable NFTs on UI
 //child address is provided by user
-const CHILD_ADDRESS = "0x491D27f7F320AbA14b72bc3597a962fD90268943";
+const CHILD_ADDRESS = "0x6B0F6B2c0e0783145F84dbabad56158A4bfD4E1B";
 
 async function childMintWrapper() {
   await childMint(CHILD_ADDRESS, 1);
@@ -316,6 +323,10 @@ async function nestTransferFromWrapper() {
 
 async function acceptChildWrapper() {
   await acceptChild(1, 0, CHILD_ADDRESS, 2);
+}
+
+async function rejectAllChildrenWrapper() {
+  await rejectAllChildren(1, 10);
 }
 
 async function transferChildWrapper() {
@@ -378,12 +389,35 @@ async function childNestMint(tokenAddress, quantity, destinationId) {
   }
 }
 
+async function pendingChildrenOf(parentId) {
+  const signer = provider.getSigner();
+  try {
+    return await nftContract
+      .connect(signer)
+      .pendingChildrenOf(parentId);
+  } catch (e) {
+    console.log(e);
+    return 0;
+  }
+}
+
 async function acceptChild(parentId, childIndex, childAddress, childId) {
   const signer = provider.getSigner();
   try {
     await nftContract
       .connect(signer)
       .acceptChild(parentId, childIndex, childAddress, childId);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function rejectAllChildren(parentId, maxRejections) {
+  const signer = provider.getSigner();
+  try {
+    await nftContract
+      .connect(signer)
+      .rejectAllChildren(parentId, maxRejections);
   } catch (e) {
     console.log(e);
   }
