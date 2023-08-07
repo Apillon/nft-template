@@ -21,6 +21,8 @@
     <link href="./style/style.css" rel="stylesheet" />
     <script src="./js/abi.js" type="application/javascript"></script>
     <script src="./js/env.js" type="application/javascript"></script>
+    <script src="./js/utils.js" type="application/javascript"></script>
+    <script src="./js/render.js" type="application/javascript"></script>
     <script src="./js/script.js" type="application/javascript"></script>
     <script></script>
   </head>
@@ -49,6 +51,7 @@
           </button>
           <span id="connectError" class="error"></span>
         </div>
+        <span id="generalError" class="error"></span>
       </div>
       <div id="actions" style="display: none">
         <h2 class="text-center">Show NFTs:</h2>
@@ -58,6 +61,7 @@
         </div>
       </div>
       <div class="grid" id="nfts"></div>
+      <div class="modals" id="modals"></div>
     </div>
   </body>
 </html>
