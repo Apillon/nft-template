@@ -60,7 +60,7 @@ async function connectWallet() {
     iconWallet + "<span>" + walletAddress.slice(0, 11) + "</span>"
   );
 
-  await loadMyNFTs();
+  await loadAllNFTs();
 }
 
 async function mint() {
@@ -69,8 +69,16 @@ async function mint() {
     const nft = nftContract.connect(provider.getSigner());
 
     const amount = $("#amount").val();
-    const value = info.price.mul(ethers.BigNumber.from(amount)); // 0.1
-    await nft.mint(walletAddress, amount, { value });
+    const value = info.price.mul(ethers.BigNumber.from(amount));
+
+    const gasLimit = await nftContract
+      .connect(provider.getSigner())
+      .estimateGas.mint(walletAddress, amount, { value });
+
+    await nft.mint(walletAddress, amount, {
+      value,
+      gasLimit: gasLimit.mul(11).div(10),
+    });
   } catch (error) {
     console.log(error);
   } finally {
@@ -309,7 +317,6 @@ async function transferChildWrapper(
 ) {
   btnLoader($(`#transfer${fieldId}`), true);
 
-  console.log(parentId, walletAddress, 0, 0, contractAddress, childId);
   const status = await transferChild(
     parentId,
     walletAddress,
@@ -354,9 +361,16 @@ async function childMint(tokenAddress, quantity) {
   const price = await nftContract.pricePerMint();
   const value = price.mul(ethers.BigNumber.from(quantity));
   try {
+    const gasLimit = await nftContract
+      .connect(provider.getSigner())
+      .estimateGas.mint(walletAddress, quantity, { value });
+
     await childNftContract
       .connect(provider.getSigner())
-      .mint(walletAddress, quantity, { value });
+      .mint(walletAddress, quantity, {
+        value,
+        gasLimit: gasLimit.mul(11).div(10),
+      });
   } catch (e) {
     console.log(e);
   }

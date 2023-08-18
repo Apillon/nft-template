@@ -329,12 +329,12 @@ function renderModal(id, html, fieldId = "") {
         <div class="btn-modal-exit"></div>
       </div>
       <div class="modal-container">
-      <div class="parent-token">
-        ${parentHtml}
-      </div>
-      <div class="nested-tokens">
-        ${html}
-      </div>        
+        <div class="parent-token">
+          ${parentHtml}
+        </div>
+        <div class="nested-tokens">
+          ${html}
+        </div>        
       </div>
     </div>
     `;
