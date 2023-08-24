@@ -1,0 +1,164 @@
+[tooltip] > * {
+  display: inline-block;
+}
+
+[tooltip] {
+  position: relative;
+}
+
+[tooltip].large:after {
+  min-width: 13rem;
+}
+
+[tooltip]:before,
+[tooltip]:after {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 400;
+  --tw-text-opacity: 1;
+  color: rgb(240 242 218);
+  text-transform: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  pointer-events: none;
+  position: absolute;
+  display: none;
+  opacity: 0;
+}
+
+[tooltip]:before {
+  content: '';
+  border: 5px solid transparent;
+  z-index: 1001;
+}
+
+[tooltip]:after {
+  content: attr(tooltip);
+  text-align: center;
+  width: inherit;
+  min-width: 7em;
+  max-width: 21em;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 1em 2em -0.5em rgba(0, 0, 0, 0.35);
+  background: #313442;
+  z-index: 1000;
+  white-space: normal;
+}
+
+[tooltip]:hover:before,
+[tooltip]:hover:after,
+[tooltip].hover:before,
+[tooltip].hover:after {
+  display: block;
+}
+
+[tooltip]:not([position]):before,
+[tooltip][position^='top']:before {
+  bottom: 100%;
+  border-bottom-width: 0;
+  border-top-color: #313442;
+}
+
+[tooltip]:not([position]):after,
+[tooltip][position^='top']:after {
+  bottom: calc(100% + 5px);
+}
+
+[tooltip]:not([position]):before,
+[tooltip]:not([position]):after,
+[tooltip][position^='top']:before,
+[tooltip][position^='top']:after {
+  left: 50%;
+  transform: translate(-50%, -0.5em);
+}
+
+[tooltip][position^='bottom']:before {
+  top: 105%;
+  border-top-width: 0;
+  border-bottom-color: #313442;
+}
+
+[tooltip][position^='bottom']:after {
+  top: calc(105% + 5px);
+}
+
+[tooltip][position^='bottom']:before,
+[tooltip][position^='bottom']:after {
+  left: 50%;
+  transform: translate(-50%, 0.5em);
+}
+
+[tooltip][position^='left']:before {
+  top: 50%;
+  border-right-width: 0;
+  border-left-color: #313442;
+  left: calc(0em - 5px);
+  transform: translate(-0.5em, -50%);
+}
+
+[tooltip][position^='left']:after {
+  top: 50%;
+  right: calc(100% + 5px);
+  transform: translate(-0.5em, -50%);
+}
+
+[tooltip][position^='right']:before {
+  top: 50%;
+  border-left-width: 0;
+  border-right-color: #313442;
+  right: calc(0em - 5px);
+  transform: translate(0.5em, -50%);
+}
+
+[tooltip][position^='right']:after {
+  top: 50%;
+  left: calc(100% + 5px);
+  transform: translate(0.5em, -50%);
+}
+
+[tooltip]:not([position]):hover:before,
+[tooltip]:not([position]):hover:after,
+[tooltip][position^='top']:hover:before,
+[tooltip][position^='top']:hover:after,
+[tooltip][position^='bottom']:hover:before,
+[tooltip][position^='bottom']:hover:after,
+[tooltip]:not([position]).hover:after,
+[tooltip][position^='top'].hover:before,
+[tooltip][position^='top'].hover:after,
+[tooltip][position^='bottom'].hover:before,
+[tooltip][position^='bottom'].hover:after {
+  animation: tooltips-vert 0.3s ease-out forwards;
+}
+
+[tooltip][position^='left']:hover:before,
+[tooltip][position^='left']:hover:after,
+[tooltip][position^='right']:hover:before,
+[tooltip][position^='right']:hover:after,
+[tooltip][position^='left'].hover:before,
+[tooltip][position^='left'].hover:after,
+[tooltip][position^='right'].hover:before,
+[tooltip][position^='right'].hover:after {
+  animation: tooltips-horz 0.3s ease-out forwards;
+}
+
+[tooltip='']:before,
+[tooltip='']:after {
+  display: none !important;
+}
+
+@keyframes tooltips-vert {
+  to {
+    opacity: 0.9;
+    transform: translate(-50%);
+  }
+}
+
+@keyframes tooltips-horz {
+  to {
+    opacity: 0.9;
+    transform: translateY(-50%);
+  }
+}

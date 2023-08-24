@@ -1,23 +1,28 @@
 let provider = null;
-let contract = null;
+let nftContract = null;
+let walletAddress = null;
+let isCollectionNestable = false;
 let info = {};
+let myNFTs = [];
 const iconWallet =
   '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none"><path d="M4 3C2.89 3 2 3.9 2 5V19C2 19.5304 2.21071 20.0391 2.58579 20.4142C2.96086 20.7893 3.46957 21 4 21H18C18.5304 21 19.0391 20.7893 19.4142 20.4142C19.7893 20.0391 20 19.5304 20 19V16.72C20.59 16.37 21 15.74 21 15V9C21 8.26 20.59 7.63 20 7.28V5C20 4.46957 19.7893 3.96086 19.4142 3.58579C19.0391 3.21071 18.5304 3 18 3H4ZM4 5H18V7H12C11.4696 7 10.9609 7.21071 10.5858 7.58579C10.2107 7.96086 10 8.46957 10 9V15C10 15.5304 10.2107 16.0391 10.5858 16.4142C10.9609 16.7893 11.4696 17 12 17H18V19H4V5ZM12 9H19V15H12V9ZM15 10.5C14.6022 10.5 14.2206 10.658 13.9393 10.9393C13.658 11.2206 13.5 11.6022 13.5 12C13.5 12.3978 13.658 12.7794 13.9393 13.0607C14.2206 13.342 14.6022 13.5 15 13.5C15.3978 13.5 15.7794 13.342 16.0607 13.0607C16.342 12.7794 16.5 12.3978 16.5 12C16.5 11.6022 16.342 11.2206 16.0607 10.9393C15.7794 10.658 15.3978 10.5 15 10.5Z" fill="currentColor"/></svg>';
 
 function initProvider() {
   provider = new ethers.providers.Web3Provider(window.ethereum);
-  contract = new ethers.Contract(nftAddress, nftAbi, provider);
+  nftContract = getNftContract(nftAddress);
 }
 
 async function connectWallet() {
   let currentChain = null;
   $("#connectError").html("");
+  btnLoader($("#btnConnect"), true);
 
   try {
     initProvider();
     currentChain = await getCurrentChain();
   } catch (e) {
     $("#connectError").html(metamaskNotSupportedMessage());
+    btnLoader($("#btnConnect"), false);
     return;
   }
 
@@ -31,158 +36,81 @@ async function connectWallet() {
       await addChain();
     }
   }
+  /** Check if collection is Nestable */
+  isCollectionNestable = await isTokenNestable(nftContract);
 
-  /** Btn onConected: Show Wallet address */
+  /** Btn onConnected: Show Wallet address */
   await ethereum.request({ method: "eth_requestAccounts" });
-  const address = await provider.getSigner().getAddress();
-  $("#btnConnect").html(
-    iconWallet + "<span>" + address.slice(0, 11) + "</span>"
-  );
+  walletAddress = await provider.getSigner().getAddress();
 
   try {
     info = await getCollectionInfo();
   } catch (e) {
     console.warn(e);
     $("#connectError").html("Error: Invalid NFT collection");
+    btnLoader($("#btnConnect"), false);
     return;
   }
 
-  loadInfo();
-  await loadAllNFTs();
-}
+  await loadInfo(isCollectionNestable);
+  myNFTs = await getMyNftIDs();
 
-function browserName() {
-  let userAgent = navigator.userAgent;
-  let browserName = "";
-
-  if (userAgent.match(/chrome|chromium|crios/i)) {
-    browserName = "chrome";
-  } else if (userAgent.match(/firefox|fxios/i)) {
-    browserName = "firefox";
-  } else if (userAgent.match(/safari/i)) {
-    browserName = "safari";
-  } else if (userAgent.match(/opr\//i)) {
-    browserName = "opera";
-  } else if (userAgent.match(/edg/i)) {
-    browserName = "edge";
-  } else if (userAgent.match(/brave/i)) {
-    browserName = "brave";
-  } else {
-    browserName = "No browser detection";
-  }
-  return browserName;
-}
-function browserSupportsMetaMask() {
-  return ["chrome", "firefox", "brave", "edge", "opera"].includes(
-    browserName()
+  btnLoader($("#btnConnect"), false);
+  $("#btnConnect").html(
+    iconWallet + "<span>" + walletAddress.slice(0, 11) + "</span>"
   );
-}
-function metamaskNotSupportedMessage() {
-  return browserSupportsMetaMask()
-    ? "You need MetaMask extension to connect wallet!"
-    : "Your browser does not support MetaMask, please use another browser!";
-}
 
-function loadInfo() {
-  let content = `
-          <b> Name: </b>${info.name} </br>
-          <b> Symbol: </b>${info.symbol} </br>
-          <b> Soulbound: </b>${info.soulbound} </br>
-          <b> Supply: </b>${info.totalSupply}/${info.maxSupply} </br>
-        `;
-
-  if (info.drop) {
-    const dropStartTimestamp = info.dropStart.toNumber() * 1000;
-
-    content = `${content}
-          <b> Price: </b>${ethers.utils.formatEther(info.price)}</br>
-          `;
-    if (info.totalSupply.eq(info.maxSupply)) {
-      $("#drop").html("<h3>Sold out!</h3>");
-    } else if (dropStartTimestamp > Date.now()) {
-      // The data/time we want to countdown to
-      const dropStartDate = new Date(dropStartTimestamp);
-      countdown(dropStartDate);
-
-      // Run myfunc every second
-      var myfunc = setInterval(function () {
-        countdown(dropStartDate);
-        // Display the message when countdown is over
-        var timeleft = dropStartDate - new Date().getTime();
-        if (timeleft < 0) {
-          clearInterval(myfunc);
-          renderMint();
-        }
-      }, 1000);
-    } else {
-      renderMint();
-    }
-  }
-  $("#collection").html(content);
-  $("#actions").show();
-}
-
-function countdown(date) {
-  var now = new Date().getTime();
-  var timeleft = date - now;
-
-  // Calculating the days, hours, minutes and seconds left
-  var days = Math.floor(timeleft / (1000 * 60 * 60 * 24));
-  var hours = Math.floor((timeleft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  var minutes = Math.floor((timeleft % (1000 * 60 * 60)) / (1000 * 60));
-  var seconds = Math.floor((timeleft % (1000 * 60)) / 1000);
-
-  $("#drop").html(`
-    <b> Drop: </b>${date.toDateString()} ${date.toLocaleTimeString()} </br>
-    ${days} <b>d </b>
-    ${hours} <b>h </b>
-    ${minutes} <b>m </b>
-    ${seconds} <b>s </b>
-  `);
-}
-function renderMint() {
-  $("#drop").html(`
-    <div class="amount">
-      <label for="amount">Number of tokens (1-5):</label>
-      <input id="amount" type="number" min="1" max="5" value="1" />
-    </div>
-    <button id="btnMint" onclick="mint()">Mint</button>
-  `);
+  await loadAllNFTs();
 }
 
 async function mint() {
   btnLoader($("#btnMint"), true);
-  try {
-    const nft = new ethers.Contract(nftAddress, nftAbi, provider).connect(
-      provider.getSigner()
-    );
 
-    const address = await provider.getSigner().getAddress();
-    const amount = $("#amount").val();
-    const value = info.price.mul(ethers.BigNumber.from(amount)); // 0.1
-    const tx = await nft.mint(address, amount, { value });
-
+  const amount = $("#amount").val();
+  if (!checkInputAmount(amount)) {
+    console.log("Wrong amount number");
     btnLoader($("#btnMint"), false);
-  } catch (error) {
-    console.log(error);
+    return;
+  }
+  try {
+    const value = info.price.mul(ethers.BigNumber.from(amount));
+
+    const gasLimit = await nftContract
+      .connect(provider.getSigner())
+      .estimateGas.mint(walletAddress, amount, { value });
+
+    await nftContract
+      .connect(provider.getSigner())
+      .mint(walletAddress, amount, {
+        value,
+        gasLimit: gasLimit.mul(11).div(10),
+      });
+  } catch (e) {
+    console.log(e);
+    const defaultMsg = "Token could not be minted! Check contract address.";
+    const msg = transactionError(defaultMsg, e);
+    transactionStatus(msg);
+  } finally {
     btnLoader($("#btnMint"), false);
   }
 }
 
 async function getCollectionInfo() {
   const info = {};
-  info["name"] = await contract.name();
-  info["symbol"] = await contract.symbol();
-  info["maxSupply"] = await contract.maxSupply();
-  info["totalSupply"] = await contract.totalSupply();
-  info["soulbound"] = await contract.isSoulbound();
-  info["revokable"] = await contract.isRevokable();
-  info["drop"] = await contract.isDrop();
-  info["dropStart"] = await contract.dropStart();
-  info["reserve"] = await contract.reserve();
-  info["price"] = await contract.price();
-  info["royaltiesFees"] = await contract.royaltiesFees();
-  info["royaltiesAddress"] = await contract.royaltiesAddress();
+  info["address"] = nftContract.address;
+  info["name"] = await nftContract.name();
+  info["symbol"] = await nftContract.symbol();
+  info["maxSupply"] = await nftContract.maxSupply();
+  info["totalSupply"] = await nftContract.totalSupply();
+  info["soulbound"] = await nftContract.isSoulbound();
+  info["revokable"] = await nftContract.isRevokable();
+  info["drop"] = await nftContract.isDrop();
+  info["dropStart"] = await nftContract.dropStart();
+  info["reserve"] = await nftContract.reserve();
+  info["price"] = await nftContract.pricePerMint();
+  info["royaltiesFees"] = await nftContract.getRoyaltyPercentage();
+  info["royaltiesAddress"] = await nftContract.getRoyaltyRecipient();
+
   return info;
 }
 
@@ -255,97 +183,318 @@ async function switchChain() {
   });
 }
 
+async function getMyNftIDs(tokenAddress = null) {
+  const nftIDs = [];
+  try {
+    const contract = !tokenAddress ? nftContract : getNftContract(tokenAddress);
+    const balance = await contract.balanceOf(walletAddress);
+
+    for (let i = 0; i < balance.toBigInt(); i++) {
+      const tokenId = await nftContract.tokenOfOwnerByIndex(walletAddress, i);
+      nftIDs.push(tokenId.toNumber());
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  return nftIDs;
+}
+
 async function loadAllNFTs() {
   btnLoader($("#btnAllNFTs"), true);
   const balance = info.totalSupply;
+  await showNFTs(balance);
 
-  await renderNFTs(balance);
   btnLoader($("#btnAllNFTs"), false);
 }
 
 async function loadMyNFTs() {
   btnLoader($("#myNFTs"), true);
-  const address = await provider.getSigner().getAddress();
-  const balance = await contract.balanceOf(address);
-
-  await renderNFTs(balance, address);
-
+  const balance = await nftContract.balanceOf(walletAddress);
+  await showNFTs(balance, walletAddress);
   btnLoader($("#myNFTs"), false);
 }
 
-async function renderNFTs(balance, address = null) {
-  if (balance.toBigInt() > 0) {
-    $("#nfts").html("");
-  } else if (address) {
-    $("#nfts").html('<h2 class="text-center">You don\'t have any NFTs</h2>');
-    return;
-  } else {
-    $("#nfts").html(
-      '<h2 class="text-center">No NFTs, they must be minted first.</h2>'
-    );
+//GENERIC NFTS
+
+async function showNFTs(balance, address = null) {
+  const nftsExist = nftExistsCheckAndErrorRender(balance.toBigInt(), address);
+  if (!nftsExist) {
     return;
   }
 
   for (let i = 0; i < balance.toBigInt(); i++) {
     const id = address
-      ? await contract.tokenOfOwnerByIndex(address, i)
-      : await contract.tokenByIndex(i);
-    const url = await contract.tokenURI(id.toBigInt());
+      ? await nftContract.tokenOfOwnerByIndex(address, i)
+      : await nftContract.tokenByIndex(i);
+    const url = await nftContract.tokenURI(id.toBigInt());
 
-    let metadata = null;
-    try {
-      metadata = await $.getJSON(url);
-
-      $("#nfts").append(`
-        <div class="box br" id="nft_${id}">
-          <img src="${metadata.image}" alt="${metadata.name}" />
-          <div class="box-content">
-            <h3>${metadata.name || `#${id}`}</h3>
-            <p>${metadata.description}</p>
-          </div>
-        </div>
-      `);
-    } catch (e) {
-      console.log(e);
-      metadata = {
-        name: "",
-        description: "",
-        image: "",
-      };
-      $("#nfts").html(
-        '<h3 class="text-center">Apologies, we were unable to load NFTs at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
-      );
-    }
+    await renderNft(id.toNumber(), url);
   }
 }
 
-function btnLoader(el, loading) {
-  if (loading) {
-    el.attr("data-text", el.text());
-    el.addClass("loading");
-    el.html(`
-      <svg
-      class="spinner"
-      style="
-        margin: -${12}px 0 0 -${12}px;
-        width: ${24}px;
-        height: ${24}px;
-      "
-      viewBox="0 0 50 50"
-    >
-      <circle
-        cx="25"
-        cy="25"
-        r="20"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        class="path"
-      ></circle>
-    </svg>
-    `);
-  } else {
-    el.removeClass("loading");
-    el.html(el.attr("data-text"));
+// Nestable NFTs on UI
+
+async function mintWrapper() {
+  btnLoader($(`#mint`), true);
+  await childMint(nftAddress, 1);
+  btnLoader($(`#mint`), false);
+}
+async function childMintWrapper() {
+  btnLoader($(`#childMint`), true);
+
+  const address = $(`#address`).val();
+  if (checkInputAddress(address)) {
+    await childMint(address, 1);
+  }
+
+  btnLoader($(`#childMint`), false);
+}
+
+async function childNestMintWrapper(destinationId, fieldId = "") {
+  btnLoader($(`#childNestMint${fieldId}`), true);
+  const address = $(`#addressNestMint${fieldId}`).val();
+
+  if (checkInputAddress(address, fieldId)) {
+    const status = await childNestMint(address, 1, destinationId);
+    transactionStatus(status, fieldId);
+  }
+
+  btnLoader($(`#childNestMint${fieldId}`), false);
+}
+
+async function acceptChildWrapper(parentId, childAddress, childId, fieldId) {
+  if (!childAddress) {
+    return;
+  }
+  btnLoader($(`#acceptChild${fieldId}`), true);
+
+  const status = await acceptChild(parentId, 0, childAddress, childId);
+  transactionStatus(status, fieldId);
+
+  btnLoader($(`#acceptChild${fieldId}`), false);
+}
+
+async function rejectAllChildrenWrapper(
+  parentId,
+  pendingChildrenNum = 1,
+  fieldId = ""
+) {
+  btnLoader($(`#rejectAllChildren${fieldId}`), true);
+
+  const status = await rejectAllChildren(parentId, pendingChildrenNum);
+  transactionStatus(status, fieldId);
+
+  btnLoader($(`#rejectAllChildren${fieldId}`), false);
+}
+
+async function nestTransferFromWrapper(destinationId, fieldId = "") {
+  btnLoader($(`#nestTransferFrom${fieldId}`), true);
+
+  const address = $(`#addressTransferFrom${fieldId}`).val();
+  const tokenId = $(`#tokenTransferFrom${fieldId}`).val();
+  if (
+    checkInputAddress(address, fieldId) &&
+    checkInputToken(tokenId, fieldId)
+  ) {
+    const status = await nestTransferFrom(
+      address,
+      nftContract.address,
+      tokenId,
+      destinationId,
+      "0x"
+    );
+    transactionStatus(status, fieldId);
+  }
+
+  btnLoader($(`#nestTransferFrom${fieldId}`), false);
+}
+
+async function transferChildWrapper(
+  parentId,
+  contractAddress,
+  childId,
+  fieldId = ""
+) {
+  btnLoader($(`#transfer${fieldId}`), true);
+  console.log(fieldId);
+
+  const status = await transferChild(
+    parentId,
+    walletAddress,
+    0,
+    0,
+    contractAddress,
+    childId,
+    false,
+    "0x"
+  );
+  console.log(status);
+  transactionStatus(status, fieldId);
+
+  btnLoader($(`#transfer${fieldId}`), false);
+}
+
+// NESTABLE NFTs
+
+async function isTokenNestable(contract) {
+  try {
+    return await contract.supportsInterface("0x42b0e56f");
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}
+
+function getNftContract(tokenAddress) {
+  return new ethers.Contract(tokenAddress, nftAbi, provider);
+}
+
+async function childMint(tokenAddress, quantity) {
+  const childNftContract = getNftContract(tokenAddress);
+  const isNestable = await isTokenNestable(childNftContract);
+  if (!isNestable) {
+    console.error("Child token is not nestable");
+    return;
+  }
+  const price = await nftContract.pricePerMint();
+  const value = price.mul(ethers.BigNumber.from(quantity));
+  try {
+    const gasLimit = await nftContract
+      .connect(provider.getSigner())
+      .estimateGas.mint(walletAddress, quantity, { value });
+
+    await childNftContract
+      .connect(provider.getSigner())
+      .mint(walletAddress, quantity, {
+        value,
+        gasLimit: gasLimit.mul(11).div(10),
+      });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function childNestMint(tokenAddress, quantity, destinationId) {
+  const childNftContract = getNftContract(tokenAddress);
+  const isNestable = await isTokenNestable(childNftContract);
+  if (!isNestable) {
+    console.error("Child token is not nestable");
+    return "Child token is not nestable";
+  }
+  const price = await childNftContract.pricePerMint();
+  const value = price.mul(ethers.BigNumber.from(quantity));
+  try {
+    await childNftContract
+      .connect(provider.getSigner())
+      .nestMint(nftContract.address, quantity, destinationId, { value });
+    return "";
+  } catch (e) {
+    console.log(e);
+    const defaultMsg = "Token could not be minted! Check contract address.";
+    return transactionError(defaultMsg, e);
+  }
+}
+
+async function childrenOf(parentId, tokenAddress = null) {
+  try {
+    const contract = !tokenAddress ? nftContract : getNftContract(tokenAddress);
+    return await contract.connect(provider.getSigner()).childrenOf(parentId);
+  } catch (e) {
+    console.log(e);
+    return 0;
+  }
+}
+
+async function pendingChildrenOf(parentId, tokenAddress = null) {
+  try {
+    const contract = !tokenAddress ? nftContract : getNftContract(tokenAddress);
+    return await contract
+      .connect(provider.getSigner())
+      .pendingChildrenOf(parentId);
+  } catch (e) {
+    console.log(e);
+    return 0;
+  }
+}
+
+async function acceptChild(parentId, childIndex, childAddress, childId) {
+  try {
+    await nftContract
+      .connect(provider.getSigner())
+      .acceptChild(parentId, childIndex, childAddress, childId);
+    return "";
+  } catch (e) {
+    console.log(e);
+    return transactionError("Token could not be accepted!", e);
+  }
+}
+
+async function rejectAllChildren(parentId, maxRejections) {
+  try {
+    await nftContract
+      .connect(provider.getSigner())
+      .rejectAllChildren(parentId, maxRejections);
+    return "";
+  } catch (e) {
+    console.log(e);
+    return transactionError("Token could not be rejected!", e);
+  }
+}
+
+async function nestTransferFrom(
+  tokenAddress,
+  toAddress,
+  tokenId,
+  destinationId,
+  data
+) {
+  const childNftContract = getNftContract(tokenAddress);
+  const isNestable = await isTokenNestable(childNftContract);
+  if (!isNestable) {
+    console.error("Child token is not nestable");
+    return "Child token is not nestable";
+  }
+
+  try {
+    await childNftContract
+      .connect(provider.getSigner())
+      .nestTransferFrom(walletAddress, toAddress, tokenId, destinationId, data);
+    return "";
+  } catch (e) {
+    console.log(e);
+    const defaultMsg =
+      "Token could not be transferred! Wrong token address or token ID.";
+    return transactionError(defaultMsg, e);
+  }
+}
+
+async function transferChild(
+  tokenId,
+  toAddress,
+  destinationId,
+  childIndex,
+  childAddress,
+  childId,
+  isPending,
+  data
+) {
+  try {
+    await nftContract
+      .connect(provider.getSigner())
+      .transferChild(
+        tokenId,
+        toAddress,
+        destinationId,
+        childIndex,
+        childAddress,
+        childId,
+        isPending,
+        data
+      );
+    return "";
+  } catch (e) {
+    console.log(e);
+    const defaultMsg = "Token could not be transferred!";
+    return transactionError(defaultMsg, e);
   }
 }
