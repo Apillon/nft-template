@@ -1,5 +1,11 @@
 function loadInfo(isCollectionNestable) {
   let content = `
+          <b> Collection address: </b>
+          <a href="${collectionLink(info.address)}" target="_blank">
+            ${info.address} 
+            <img src="./images/icon-open.svg" width="10" height="10" />
+          </a>
+          </br>
           <b> Name: </b>${info.name} </br>
           <b> Symbol: </b>${info.symbol} </br>
           <b> Soulbound: </b>${info.soulbound} </br>
@@ -35,8 +41,6 @@ function loadInfo(isCollectionNestable) {
           }
         }
       }, 1000);
-    } else if (isCollectionNestable) {
-      renderMintNestable();
     } else {
       renderMint();
     }
@@ -66,11 +70,11 @@ function countdown(date) {
 
 function renderMint() {
   $("#drop").html(`
-    <div class="field">
+    <div class="field-amount">
       <label for="amount">Number of tokens (1-5):</label>
       <input id="amount" type="number" min="1" max="5" value="1" />
     </div>
-    <button id="btnMint" onclick="mint()">Mint</button>
+    <button class="btn-mint" id="btnMint" onclick="mint()">Mint</button>
   `);
 }
 
@@ -146,14 +150,18 @@ function checkInputAddress(address = null, fieldId = "") {
     return false;
   }
 }
-function transactionStatus(status, msg, fieldId = "") {
-  if (status) {
+function checkInputAmount(amount = null, fieldId = "") {
+  if (amount && Number(amount) > 0 && Number(amount) <= 5) {
     $(`#generalError${fieldId}`).html("");
+    return true;
   } else {
-    $(`#generalError${fieldId}`).html(msg);
+    $(`#generalError${fieldId}`).html(
+      "Enter valid amount (number from 1 to 5)!"
+    );
+    window.scrollTo(0, 0);
+    return false;
   }
 }
-
 function checkInputToken(token = null, fieldId = "") {
   if (token && Number(token) >= 0) {
     $(`#generalError${fieldId}`).html("");
@@ -163,6 +171,34 @@ function checkInputToken(token = null, fieldId = "") {
     window.scrollTo(0, 0);
     return false;
   }
+}
+
+function transactionStatus(msg, fieldId = "") {
+  $(`#generalError${fieldId}`).html(msg);
+}
+
+function transactionError(msg, error) {
+  if (error) {
+    const errorMsg =
+      typeof error === "string"
+        ? error
+        : typeof error === "object" && error?.data?.message
+        ? error.data.message
+        : typeof error === "object" && error?.message
+        ? error.message
+        : JSON.stringify(error);
+
+    if (errorMsg.includes("rejected") || errorMsg.includes("denied")) {
+      return "Transaction has been rejected";
+    } else if (errorMsg.includes("OutOfFund")) {
+      return "Your account balance is too low";
+    } else if (errorMsg.includes("account balance too low")) {
+      return "Your account balance is too low";
+    } else if (error?.message.includes("transaction")) {
+      return "Transaction failed";
+    }
+  }
+  return msg;
 }
 
 async function renderNft(id, url) {
@@ -182,7 +218,7 @@ async function renderNft(id, url) {
         <div class="box br" id="nft_${id}">
           <img src="${metadata.image}" alt="${metadata.name}" />
           <div class="box-content">
-            <h3>${metadata.name || `#${id}`}</h3>
+            <h3>#${id} ${metadata.name}</h3>
             <p>${metadata.description}</p>
             ${btnOpenModal}
           </div>
@@ -224,12 +260,13 @@ async function renderChild(contractAddress, parentId, id, url, fieldId) {
         <div class="box" id="nft${fieldId}_${id}">
           <img src="${metadata.image}" alt="${metadata.name}" />
           <div class="box-content">
-            <h3>${metadata.name || `#${id}`}</h3>
+            <h3>#${id} ${metadata.name}</h3>
             <p>${metadata.description}</p>
             <div class="btn-group">
               <button id="transfer${fieldId}_${id}" onclick="transferChildWrapper(${parentId}, '${contractAddress}', ${id}, '${fieldId}_${id}');">Transfer Token to wallet</button>
             </div>
           </div>
+          <div id="generalError${fieldId}_${id}" class="error"></div>
         </div>
       `;
   } catch (e) {
@@ -291,19 +328,34 @@ async function createModal(id, contractAddress, fieldId = "") {
         ${btnAcceptChild}
         <div class="btn-group">
           <div class="field">
-            <label for="addressNestMint${fieldId}_${id}">Contract Address:</label>
-            <input id="addressNestMint${fieldId}_${id}" type="text" />
+            <label for="addressNestMint${fieldId}_${id}">
+              <span>Contract Address</span>
+              ${renderTooltip(
+                "Enter collection address from where you want to mint NFT and transfer it to this NFT. Initial address is from this collection."
+              )}              
+            </label>
+            <input id="addressNestMint${fieldId}_${id}" type="text" value="${nftAddress}" />
           </div>
-          <button id="childNestMint${fieldId}_${id}" onclick="childNestMintWrapper(${id}, '${fieldId}_${id}');">Nest Mint</button>
+          <button id="childNestMint${fieldId}_${id}" onclick="childNestMintWrapper(${id}, '${fieldId}_${id}');">Mint Child</button>
         </div>
         <div class="btn-group">
           <div class="field">
-            <label for="addressTransferFrom${fieldId}_${id}">Contract Address:</label>
-            <input id="addressTransferFrom${fieldId}_${id}" type="text" />
+            <label for="addressTransferFrom${fieldId}_${id}">
+              <span>Contract Address</span>
+                ${renderTooltip(
+                  "Enter collection address from where you want to transfer NFT. Initial address is from this collection."
+                )}  
+            </label>
+            <input id="addressTransferFrom${fieldId}_${id}" type="text" value="${nftAddress}" />
           </div>
           <div class="field">
-            <label for="tokenTransferFrom${fieldId}_${id}">Token ID:</label>
-            <input id="tokenTransferFrom${fieldId}_${id}" type="number" />
+            <label for="tokenTransferFrom${fieldId}_${id}">
+              <span>Token ID</span>
+                ${renderTooltip(
+                  "With Token ID you choose which token you will transfer."
+                )} 
+            </label>
+            <input id="tokenTransferFrom${fieldId}_${id}" type="number" value="0" />
           </div>
           <button id="nestTransferFrom${fieldId}_${id}" onclick="nestTransferFromWrapper(${id}, '${fieldId}_${id}');">Nest Transfer From</button>
         </div>  
@@ -346,6 +398,17 @@ function renderModal(id, html, fieldId = "") {
 
   showModal(`${fieldId}_${id}`);
   modalCloseEvents(`${fieldId}_${id}`);
+}
+
+function renderTooltip(tooltipText, placeholder = "") {
+  return `
+    <span class="tooltip large" tooltip="${tooltipText}" position="top">
+      ${
+        placeholder ||
+        '<img src="images/info.svg" width="16" height="16" alt="icon info" />'
+      }
+    </span>
+    `;
 }
 
 async function showModal(id) {

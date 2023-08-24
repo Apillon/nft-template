@@ -65,22 +65,31 @@ async function connectWallet() {
 
 async function mint() {
   btnLoader($("#btnMint"), true);
-  try {
-    const nft = nftContract.connect(provider.getSigner());
 
-    const amount = $("#amount").val();
+  const amount = $("#amount").val();
+  if (!checkInputAmount(amount)) {
+    console.log("Wrong amount number");
+    btnLoader($("#btnMint"), false);
+    return;
+  }
+  try {
     const value = info.price.mul(ethers.BigNumber.from(amount));
 
     const gasLimit = await nftContract
       .connect(provider.getSigner())
       .estimateGas.mint(walletAddress, amount, { value });
 
-    await nft.mint(walletAddress, amount, {
-      value,
-      gasLimit: gasLimit.mul(11).div(10),
-    });
-  } catch (error) {
-    console.log(error);
+    await nftContract
+      .connect(provider.getSigner())
+      .mint(walletAddress, amount, {
+        value,
+        gasLimit: gasLimit.mul(11).div(10),
+      });
+  } catch (e) {
+    console.log(e);
+    const defaultMsg = "Token could not be minted! Check contract address.";
+    const msg = transactionError(defaultMsg, e);
+    transactionStatus(msg);
   } finally {
     btnLoader($("#btnMint"), false);
   }
@@ -88,6 +97,7 @@ async function mint() {
 
 async function getCollectionInfo() {
   const info = {};
+  info["address"] = nftContract.address;
   info["name"] = await nftContract.name();
   info["symbol"] = await nftContract.symbol();
   info["maxSupply"] = await nftContract.maxSupply();
@@ -97,13 +107,9 @@ async function getCollectionInfo() {
   info["drop"] = await nftContract.isDrop();
   info["dropStart"] = await nftContract.dropStart();
   info["reserve"] = await nftContract.reserve();
-  info["price"] = isCollectionNestable ? await nftContract.pricePerMint() : 0;
-  info["royaltiesFees"] = isCollectionNestable
-    ? await nftContract.getRoyaltyPercentage()
-    : 0;
-  info["royaltiesAddress"] = isCollectionNestable
-    ? await nftContract.getRoyaltyRecipient()
-    : 0;
+  info["price"] = await nftContract.pricePerMint();
+  info["royaltiesFees"] = await nftContract.getRoyaltyPercentage();
+  info["royaltiesAddress"] = await nftContract.getRoyaltyRecipient();
 
   return info;
 }
@@ -246,14 +252,12 @@ async function childMintWrapper() {
 
 async function childNestMintWrapper(destinationId, fieldId = "") {
   btnLoader($(`#childNestMint${fieldId}`), true);
-  const address = $(`#addressNestMint${fieldId}`).val() || nftAddress;
+  const address = $(`#addressNestMint${fieldId}`).val();
 
-  const status = await childNestMint(address, 1, destinationId);
-  transactionStatus(
-    status,
-    "Token could not be minted! Check contract address.",
-    fieldId
-  );
+  if (checkInputAddress(address, fieldId)) {
+    const status = await childNestMint(address, 1, destinationId);
+    transactionStatus(status, fieldId);
+  }
 
   btnLoader($(`#childNestMint${fieldId}`), false);
 }
@@ -265,7 +269,7 @@ async function acceptChildWrapper(parentId, childAddress, childId, fieldId) {
   btnLoader($(`#acceptChild${fieldId}`), true);
 
   const status = await acceptChild(parentId, 0, childAddress, childId);
-  transactionStatus(status, "Token could not be accepted!", fieldId);
+  transactionStatus(status, fieldId);
 
   btnLoader($(`#acceptChild${fieldId}`), false);
 }
@@ -278,7 +282,7 @@ async function rejectAllChildrenWrapper(
   btnLoader($(`#rejectAllChildren${fieldId}`), true);
 
   const status = await rejectAllChildren(parentId, pendingChildrenNum);
-  transactionStatus(status, "Token could not be rejected!", fieldId);
+  transactionStatus(status, fieldId);
 
   btnLoader($(`#rejectAllChildren${fieldId}`), false);
 }
@@ -299,11 +303,7 @@ async function nestTransferFromWrapper(destinationId, fieldId = "") {
       destinationId,
       "0x"
     );
-    transactionStatus(
-      status,
-      "Token could not be transferred! Wrong token address or token ID.",
-      fieldId
-    );
+    transactionStatus(status, fieldId);
   }
 
   btnLoader($(`#nestTransferFrom${fieldId}`), false);
@@ -316,6 +316,7 @@ async function transferChildWrapper(
   fieldId = ""
 ) {
   btnLoader($(`#transfer${fieldId}`), true);
+  console.log(fieldId);
 
   const status = await transferChild(
     parentId,
@@ -327,11 +328,8 @@ async function transferChildWrapper(
     false,
     "0x"
   );
-  transactionStatus(
-    status,
-    "Token could not be transferred! Wrong token address or token ID.",
-    fieldId
-  );
+  console.log(status);
+  transactionStatus(status, fieldId);
 
   btnLoader($(`#transfer${fieldId}`), false);
 }
@@ -381,19 +379,20 @@ async function childNestMint(tokenAddress, quantity, destinationId) {
   const isNestable = await isTokenNestable(childNftContract);
   if (!isNestable) {
     console.error("Child token is not nestable");
-    return false;
+    return "Child token is not nestable";
   }
-  const price = await nftContract.pricePerMint();
+  const price = await childNftContract.pricePerMint();
   const value = price.mul(ethers.BigNumber.from(quantity));
   try {
     await childNftContract
       .connect(provider.getSigner())
       .nestMint(nftContract.address, quantity, destinationId, { value });
-    return true;
+    return "";
   } catch (e) {
     console.log(e);
+    const defaultMsg = "Token could not be minted! Check contract address.";
+    return transactionError(defaultMsg, e);
   }
-  return false;
 }
 
 async function childrenOf(parentId, tokenAddress = null) {
@@ -423,10 +422,10 @@ async function acceptChild(parentId, childIndex, childAddress, childId) {
     await nftContract
       .connect(provider.getSigner())
       .acceptChild(parentId, childIndex, childAddress, childId);
-    return true;
+    return "";
   } catch (e) {
     console.log(e);
-    return false;
+    return transactionError("Token could not be accepted!", e);
   }
 }
 
@@ -435,10 +434,10 @@ async function rejectAllChildren(parentId, maxRejections) {
     await nftContract
       .connect(provider.getSigner())
       .rejectAllChildren(parentId, maxRejections);
-    return true;
+    return "";
   } catch (e) {
     console.log(e);
-    return false;
+    return transactionError("Token could not be rejected!", e);
   }
 }
 
@@ -453,17 +452,19 @@ async function nestTransferFrom(
   const isNestable = await isTokenNestable(childNftContract);
   if (!isNestable) {
     console.error("Child token is not nestable");
-    return false;
+    return "Child token is not nestable";
   }
 
   try {
     await childNftContract
       .connect(provider.getSigner())
       .nestTransferFrom(walletAddress, toAddress, tokenId, destinationId, data);
-    return true;
+    return "";
   } catch (e) {
     console.log(e);
-    return false;
+    const defaultMsg =
+      "Token could not be transferred! Wrong token address or token ID.";
+    return transactionError(defaultMsg, e);
   }
 }
 
@@ -490,9 +491,10 @@ async function transferChild(
         isPending,
         data
       );
-    return true;
+    return "";
   } catch (e) {
     console.log(e);
-    return false;
+    const defaultMsg = "Token could not be transferred!";
+    return transactionError(defaultMsg, e);
   }
 }

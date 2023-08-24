@@ -101,3 +101,17 @@ function removeModalEvents() {
 }
 
 function handleOpenModal(event) {}
+
+function collectionLink(address) {
+  switch (chainId) {
+    case "0x504":
+      return `https://moonbeam.moonscan.io/address/${address}`;
+    case "0x507":
+      return `https://moonbase.moonscan.io/address/${address}`;
+    case "0x250":
+      return `https://astar.subscan.io/address/${address}`;
+    default:
+      console.warn("Missing chainId");
+      return "https://moonbeam.moonscan.io";
+  }
+}

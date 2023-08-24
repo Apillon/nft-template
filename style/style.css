@@ -62,7 +62,7 @@ body.lock {
 }
 .drop {
   max-width: 500px;
-  margin: 0 auto;
+  margin: 1rem auto 0;
 }
 .field {
   margin-bottom: 8px;
@@ -208,9 +208,11 @@ button span {
   width: fit-content;
   min-width: 132px;
 }
-.error {
-  color: red;
-  font-size: 12px;
+.btn-mint {
+  display: inline-block;
+  width: fit-content;
+  min-width: 120px;
+  margin-top: 0.5rem;
 }
 .builders {
   display: inline-block;
@@ -225,6 +227,11 @@ button span {
 .builders:hover {
   color: #141721;
   background-color: #f9ff73;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
 }
 
 .modal {
