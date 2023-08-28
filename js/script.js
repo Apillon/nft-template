@@ -194,7 +194,7 @@ async function getMyNftIDs(tokenAddress = null) {
       nftIDs.push(tokenId.toNumber());
     }
   } catch (error) {
-    console.log(error);
+    console.warn(error);
   }
   return nftIDs;
 }
@@ -340,7 +340,7 @@ async function isTokenNestable(contract) {
   try {
     return await contract.supportsInterface("0x42b0e56f");
   } catch (e) {
-    console.error(e);
+    console.warn(e);
     return false;
   }
 }
