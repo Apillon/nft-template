@@ -54,6 +54,8 @@ npx http-server
 
 ## Deploy to Apillon Hosting
 
+Deploy entire project according to this documentation: [Wiki](https://wiki.apillon.io/build/2-web3-services.html#web3-hosting)
+
 ### Basic
 
 1. If not already, register to [Apillon.io](https://app.apillon.io)
