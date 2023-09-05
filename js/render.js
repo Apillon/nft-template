@@ -1,4 +1,5 @@
 function loadInfo(isCollectionNestable) {
+  const maxSupply = info.maxSupply.toString() === ethers.constants.MaxUint256.toString() ? '&infin;' : info.maxSupply.toString()
   let content = `
           <b> Collection address: </b>
           <a href="${collectionLink(info.address)}" target="_blank">
@@ -8,8 +9,9 @@ function loadInfo(isCollectionNestable) {
           </br>
           <b> Name: </b>${info.name} </br>
           <b> Symbol: </b>${info.symbol} </br>
+          <b> Revocable: </b>${info.revokable} </br>
           <b> Soulbound: </b>${info.soulbound} </br>
-          <b> Supply: </b>${info.totalSupply}/${info.maxSupply} </br>
+          <b> Supply: </b>${info.totalSupply}/${maxSupply} </br>
         `;
 
   if (info.drop) {
@@ -86,8 +88,8 @@ function renderMintNestable() {
       <br /><br />
       <strong>Or mint another nestable collection</strong>  
       <br /><br />
-      <div class="field">
-        <label for="address">Contract Address:</label>
+      <div class="field"> 
+        <label for="address">Child Contract Address:</label>
         <input id="address" type="text" />
       </div>
       <button id="childMint" onclick="childMintWrapper();">Mint</button>      
@@ -211,7 +213,7 @@ async function renderNft(id, url) {
 
     const btnOpenModal =
       isCollectionNestable && isMyNFT
-        ? `<button data-modal="modal_${id}" data-token-id="${id}" onclick="createModal(${id}, '${nftAddress}');">Open NFT</button>`
+        ? `<button data-modal="modal_${id}" data-token-id="${id}" onclick="createModal(${id}, '${contractAddress}', '${metadata.name}');">Open NFT</button>`
         : "";
 
     $("#nfts").append(`
@@ -228,7 +230,7 @@ async function renderNft(id, url) {
     console.log(e);
     if ($("#nfts").text().length <= 1) {
       $("#nfts").html(
-        '<h3 class="text-center">Apologies, we were unable to load NFTs at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
+        '<h3 class="text-center">Apologies, we were unable to load NFTs metadata at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
       );
     }
   }
@@ -271,11 +273,11 @@ async function renderChild(contractAddress, parentId, id, url, fieldId) {
       `;
   } catch (e) {
     console.log(e);
-    return "<div>Apologies, we were unable to load NFTs. </div>";
+    return "<div>Apologies, we were unable to load NFTs metadata. </div>";
   }
 }
 
-async function createModal(id, contractAddress, fieldId = "") {
+async function createModal(id, contractAddress, nftName, fieldId = "") {
   if ($(`#modal${fieldId}_${id}`).length) {
     showModal(`${fieldId}_${id}`);
     return;
@@ -326,27 +328,27 @@ async function createModal(id, contractAddress, fieldId = "") {
     <div class="nestable">
       <div class="nestable-actions">      
         ${btnAcceptChild}
-        <div class="btn-group">
+        <div class="btn-group"> 
           <div class="field">
             <label for="addressNestMint${fieldId}_${id}">
-              <span>Contract Address</span>
+              <span>Child Contract Address</span>
               ${renderTooltip(
-                "Enter collection address from where you want to mint NFT and transfer it to this NFT. Initial address is from this collection."
+                "Enter child collection address from where you want to mint NFT and transfer it to this NFT. Initial address is from this collection."
               )}              
             </label>
-            <input id="addressNestMint${fieldId}_${id}" type="text" value="${nftAddress}" />
+            <input id="addressNestMint${fieldId}_${id}" type="text" value="${contractAddress}" />
           </div>
-          <button id="childNestMint${fieldId}_${id}" onclick="childNestMintWrapper(${id}, '${fieldId}_${id}');">Mint Child</button>
+          <button id="childNestMint${fieldId}_${id}" onclick="childNestMintWrapper(${id}, '${fieldId}_${id}');">Nest Mint Child under ${nftName}</button>
         </div>
         <div class="btn-group">
           <div class="field">
             <label for="addressTransferFrom${fieldId}_${id}">
-              <span>Contract Address</span>
+              <span>Child Contract Address</span>
                 ${renderTooltip(
-                  "Enter collection address from where you want to transfer NFT. Initial address is from this collection."
+                  "Enter child collection address from where you want to transfer NFT. Initial address is from this collection."
                 )}  
             </label>
-            <input id="addressTransferFrom${fieldId}_${id}" type="text" value="${nftAddress}" />
+            <input id="addressTransferFrom${fieldId}_${id}" type="text" value="${contractAddress}" />
           </div>
           <div class="field">
             <label for="tokenTransferFrom${fieldId}_${id}">
@@ -357,7 +359,7 @@ async function createModal(id, contractAddress, fieldId = "") {
             </label>
             <input id="tokenTransferFrom${fieldId}_${id}" type="number" value="0" />
           </div>
-          <button id="nestTransferFrom${fieldId}_${id}" onclick="nestTransferFromWrapper(${id}, '${fieldId}_${id}');">Nest Transfer From</button>
+          <button id="nestTransferFrom${fieldId}_${id}" onclick="nestTransferFromWrapper(${id}, '${fieldId}_${id}');">Nest NFT under ${nftName}</button>
         </div>  
       
       </div>

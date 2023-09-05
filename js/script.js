@@ -9,7 +9,7 @@ const iconWallet =
 
 function initProvider() {
   provider = new ethers.providers.Web3Provider(window.ethereum);
-  nftContract = getNftContract(nftAddress);
+  nftContract = getNftContract(contractAddress);
 }
 
 async function connectWallet() {
@@ -236,7 +236,7 @@ async function showNFTs(balance, address = null) {
 
 async function mintWrapper() {
   btnLoader($(`#mint`), true);
-  await childMint(nftAddress, 1);
+  await childMint(contractAddress, 1);
   btnLoader($(`#mint`), false);
 }
 async function childMintWrapper() {

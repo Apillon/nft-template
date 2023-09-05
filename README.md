@@ -31,7 +31,7 @@ To configure the template, do the following:
 Example:
 
 ```sh
-const nftAddress = ""; // Paste the address of the NFT collection between the parenthesis
+const contractAddress = ""; // Paste the address of the NFT collection between the parenthesis
 
 // uncomment the chain you are using by deleting the slashes
 // const chainId = "0x507"; // Moonbase
