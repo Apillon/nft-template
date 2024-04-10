@@ -50,12 +50,10 @@ async function rejectAllChildrenWrapper(parentId, pendingChildrenNum = 1, fieldI
 }
 
 async function nestTransferFromWrapper(destinationId, fieldId = '', contractAddress = '') {
-  console.log(destinationId, fieldId, contractAddress);
   btnLoader($(`#nestTransferFrom${fieldId}`), true);
 
   const address = $(`#addressTransferFrom${fieldId}`).val() || contractAddress;
   const tokenId = $(`#tokenTransferFrom${fieldId}`).val() || $(`input[type="radio"][name="nest${fieldId}"]:checked`).val();
-  console.log(address, tokenId);
 
   if (checkInputAddress(address, fieldId) && checkInputToken(tokenId, fieldId)) {
     const status = await nestTransferFrom(address, nftContract.address, tokenId, destinationId, '0x');
@@ -187,13 +185,10 @@ async function nestTransferFrom(tokenAddress, toAddress, tokenId, destinationId,
     console.error('Child token is not nestable');
     return 'Child token is not nestable';
   }
-  console.log(tokenAddress, toAddress, tokenId, destinationId, data);
 
   try {
     const tx = await childNftContract.connect(provider.getSigner()).nestTransferFrom(walletAddress, toAddress, tokenId, destinationId, data);
-    console.log(tx);
-    const receipt = await tx.wait();
-    console.log(receipt);
+    await tx.wait();
 
     await refreshState();
     return '';
