@@ -1,34 +1,30 @@
 function browserName() {
   let userAgent = navigator.userAgent;
-  let browserName = "";
+  let browserName = '';
 
   if (userAgent.match(/chrome|chromium|crios/i)) {
-    browserName = "chrome";
+    browserName = 'chrome';
   } else if (userAgent.match(/firefox|fxios/i)) {
-    browserName = "firefox";
+    browserName = 'firefox';
   } else if (userAgent.match(/safari/i)) {
-    browserName = "safari";
+    browserName = 'safari';
   } else if (userAgent.match(/opr\//i)) {
-    browserName = "opera";
+    browserName = 'opera';
   } else if (userAgent.match(/edg/i)) {
-    browserName = "edge";
+    browserName = 'edge';
   } else if (userAgent.match(/brave/i)) {
-    browserName = "brave";
+    browserName = 'brave';
   } else {
-    browserName = "No browser detection";
+    browserName = 'No browser detection';
   }
   return browserName;
 }
 function browserSupportsMetaMask() {
-  return ["chrome", "firefox", "brave", "edge", "opera"].includes(
-    browserName()
-  );
+  return ['chrome', 'firefox', 'brave', 'edge', 'opera'].includes(browserName());
 }
 
 function metamaskNotSupportedMessage() {
-  return browserSupportsMetaMask()
-    ? "You need MetaMask extension to connect wallet!"
-    : "Your browser does not support MetaMask, please use another browser!";
+  return browserSupportsMetaMask() ? 'You need MetaMask extension to connect wallet!' : 'Your browser does not support MetaMask, please use another browser!';
 }
 
 function modalEvents() {
@@ -41,24 +37,22 @@ function modalEvent(id) {
 }
 
 function addModalEvents(id = null) {
-  const modals = id
-    ? document.querySelectorAll(`[data-modal='modal${id}']`)
-    : document.querySelectorAll("[data-modal]");
+  const modals = id ? document.querySelectorAll(`[data-modal='modal${id}']`) : document.querySelectorAll('[data-modal]');
 
   modals.forEach(function (trigger) {
-    trigger.addEventListener("click", function (event) {
+    trigger.addEventListener('click', function (event) {
       event.preventDefault();
       const modal = document.getElementById(trigger.dataset.modal);
-      modal.classList.add("open");
-      document.body.classList.add("lock");
+      modal.classList.add('open');
+      document.body.classList.add('lock');
 
-      const exits = modal.querySelectorAll(".modal-exit");
+      const exits = modal.querySelectorAll('.btn-modal-exit');
       exits.forEach(function (exit) {
-        exit.addEventListener("click", function (event) {
+        exit.addEventListener('click', function (event) {
           event.preventDefault();
-          modal.classList.remove("open");
+          modal.classList.remove('open');
           if (!id || id.length < 4) {
-            document.body.classList.remove("lock");
+            document.body.classList.remove('lock');
           }
         });
       });
@@ -67,19 +61,17 @@ function addModalEvents(id = null) {
 }
 
 function modalCloseEvents(id = null) {
-  const modals = id
-    ? document.querySelectorAll(`[data-modal='modal${id}']`)
-    : document.querySelectorAll("[data-modal]");
+  const modals = id ? document.querySelectorAll(`[data-modal='modal${id}']`) : document.querySelectorAll('[data-modal]');
 
   modals.forEach(function (trigger) {
     const modal = document.getElementById(trigger.dataset.modal);
-    const exits = modal.querySelectorAll(".modal-exit");
+    const exits = modal.querySelectorAll('.btn-modal-exit');
     exits.forEach(function (exit) {
-      exit.addEventListener("click", function (event) {
+      exit.addEventListener('click', function (event) {
         event.preventDefault();
-        modal.classList.remove("open");
+        modal.classList.remove('open');
         if (!id || id.length < 4) {
-          document.body.classList.remove("lock");
+          document.body.classList.remove('lock');
         }
       });
     });
@@ -87,13 +79,13 @@ function modalCloseEvents(id = null) {
 }
 
 function removeModalEvents() {
-  const modals = document.querySelectorAll("[data-modal]");
+  const modals = document.querySelectorAll('[data-modal]');
 
   modals.forEach(function (trigger) {
     $(trigger).off();
 
     const modal = document.getElementById(trigger.dataset.modal);
-    const exits = modal.querySelectorAll(".modal-exit");
+    const exits = modal.querySelectorAll('.btn-modal-exit');
     exits.forEach(function (exit) {
       $(exit).off();
     });
@@ -104,14 +96,18 @@ function handleOpenModal(event) {}
 
 function collectionLink(address) {
   switch (chainId) {
-    case "0x504":
+    case '0x504':
       return `https://moonbeam.moonscan.io/address/${address}`;
-    case "0x507":
+    case '0x507':
       return `https://moonbase.moonscan.io/address/${address}`;
-    case "0x250":
+    case '0x250':
       return `https://astar.subscan.io/address/${address}`;
     default:
-      console.warn("Missing chainId");
-      return "https://moonbeam.moonscan.io";
+      console.warn('Missing chainId');
+      return 'https://moonbeam.moonscan.io';
   }
+}
+
+function sleep(timeMs = 1000) {
+  return new Promise(resolve => setTimeout(resolve, timeMs));
 }

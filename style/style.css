@@ -3,7 +3,7 @@
 }
 body {
   background: #f0f2da;
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
   font-style: normal;
   font-weight: 400;
   font-size: 12px;
@@ -38,10 +38,14 @@ body.lock {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   grid-gap: 32px;
 }
+.grid.small {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
 .box {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  border-radius: 0.75rem;
   background: #ffffff;
   overflow: hidden;
 }
@@ -49,7 +53,7 @@ body.lock {
   padding: 16px 24px 24px;
 }
 .box img {
-  height: 100%;
+  width: 100%;
   object-fit: contain;
 }
 .box.collection {
@@ -112,11 +116,8 @@ body.lock {
   min-width: 65vw;
 }
 .nestable-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  grid-gap: 2rem;
-  align-items: end;
-  margin: 0 auto 2rem;
+  max-width: 500px;
+  margin: 50px auto;
 }
 .child-pending {
   margin: 0 0 1rem;
@@ -134,6 +135,9 @@ body.lock {
 }
 .flex-wrap {
   flex-wrap: wrap;
+}
+.hidden {
+  display: none;
 }
 h1 {
   font-weight: 700;
@@ -237,7 +241,7 @@ button span {
 .modal {
   position: fixed;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
@@ -247,19 +251,13 @@ button span {
   align-items: center;
   justify-content: center;
 }
-.modal-bg {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.5);
-  width: 100%;
-  height: 100%;
-}
 .modal-container {
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow: auto;
-  background: #fff;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  overflow-y: auto;
+  background: #f0f2da;
   position: relative;
-  padding: 2rem;
 }
 .modal-close {
   position: absolute;
@@ -280,26 +278,99 @@ button span {
 }
 .btn-modal-exit {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 2rem;
-  height: 2rem;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 2rem;
-  cursor: pointer;
-}
-.btn-modal-exit:after {
-  content: "\00d7"; /* This will render the 'X' */
+  display: inline-block;
+  width: auto;
 }
 .parent-token {
   width: 80%;
-  max-width: 30rem;
+  max-width: 24rem;
   margin: 0 auto;
 }
-.parent-token .box.br {
-  border-radius: 0;
+
+.absolute {
+  position: absolute;
+}
+.relative {
+  position: relative;
+}
+.flex {
+  display: flex;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.nowrap {
+  white-space: nowrap;
+}
+
+.tags {
+  position: absolute;
+  top: 12px;
+  left: 0px;
+  display: flex;
+  flex-direction: column;
+}
+.tag {
+  padding: 2px 16px 2px 8px;
+  margin-bottom: 4px;
+  background-color: #78dce8;
+  clip-path: polygon(0 0, 100% 0%, 85% 100%, 0% 100%);
+}
+
+.pending-children {
+  position: absolute;
+  top: 12px;
+  right: 0px;
+  display: flex;
+  flex-direction: column;
+}
+.pending-child {
+  height: 24px;
+  padding: 2px 8px 2px 16px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  background-color: #78dce8;
+  clip-path: polygon(0 0, 100% 0%, 100% 100%, 15% 100%);
+}
+.pending-child.disabled {
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.nesting {
+  margin: 50px 0;
+  gap: 50px;
+}
+.nesting .collection {
+  height: fit-content;
+}
+.nesting input[type='radio'] {
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+}
+.nft {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  overflow: hidden;
+  border-radius: 12px;
+}
+input[type='radio'] + label {
+  cursor: pointer;
+}
+input[type='radio']:checked + label .nft {
+  box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.35);
+}
+.nestable-nft .nft {
+  max-width: 400px;
+  margin: 0 auto 0;
+}
+.nestable-info,
+.nft-transfer {
+  max-width: 500px;
+  margin: 50px auto;
 }
 
 @media (min-width: 767px) {

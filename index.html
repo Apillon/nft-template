@@ -20,11 +20,12 @@
     />
     <link href="./style/style.css" rel="stylesheet" />
     <link href="./style/tooltip.css" rel="stylesheet" />
-    <script src="./js/abi.js" type="application/javascript"></script>
-    <script src="./js/env.js" type="application/javascript"></script>
-    <script src="./js/utils.js" type="application/javascript"></script>
-    <script src="./js/render.js" type="application/javascript"></script>
-    <script src="./js/script.js" type="application/javascript"></script>
+    <script src="./js/abi.js" type="application/javascript" async></script>
+    <script src="./js/env.js" type="application/javascript" async></script>
+    <script src="./js/utils.js" type="application/javascript" async></script>
+    <script src="./js/render.js" type="application/javascript" async></script>
+    <script src="./js/script.js" type="application/javascript" async></script>
+    <script src="./js/nestable.js" type="application/javascript" async></script>
     <script></script>
   </head>
   <body>
@@ -55,6 +56,22 @@
         <span id="generalError" class="error"></span>
       </div>
       <div id="actions" style="display: none">
+        <div
+        class="nestable-info"
+      >
+        <h3>
+          The collection you are viewing supports nesting NFTs you own. To setup the nested
+          relationship between NFTs, you first have to own them.
+        </h3>
+        <strong>Instructions:</strong>
+        <ol>
+          <li>Mint one or multiple NFTs</li>
+          <li>Once minted, click on “My NFTs”</li>
+          <li>The NFTs you own will be displayed</li>
+          <li>Click on the NFT you want to set as a parent</li>
+          <li>A window will open, allowing you to link child NFTs to that NFT</li>
+        </ol>
+      </div>
         <h2 class="text-center">Show NFTs:</h2>
         <div class="actions">
           <button id="btnAllNFTs" onclick="loadAllNFTs();">All nfts</button>
