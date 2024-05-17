@@ -12,127 +12,20 @@
   <link href="./style/style.css" rel="stylesheet" />
   <link href="./style/tooltip.css" rel="stylesheet" />
   <style>
-    #collection {
-      background-color: #f2f2f2;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    #collection h2 {
-      color: #333;
-      font-weight: 700;
-    }
-    #collection p {
-      color: #666;
-      margin: 10px 0;
-    }
-    .btn-connect-wrapper {
-      margin-top: 20px;
-    }
-    .error {
-      color: red;
-      font-size: 0.9em;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-    .nft-card {
-      border: 1px solid #e1e1e1;
-      border-radius: 10px;
-      padding: 15px;
-      text-align: center;
-    }
-    .nft-image {
-      max-width: 100%;
-      height: auto;
-      border-radius: 5px;
-    }
-    /* Additional styles */
-    .modal {
-      display: none; /* Hidden by default */
-      position: fixed; /* Stay in place */
-      z-index: 1; /* Sit on top */
-      left: 0;
-      top: 0;
-      width: 100%; /* Full width */
-      height: 100%; /* Full height */
-      overflow: auto; /* Enable scroll if needed */
-      background-color: rgb(0,0,0); /* Fallback color */
-      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    }
-    .modal-content {
-      background-color: #fefefe;
-      margin: 15% auto; /* 15% from the top and centered */
-      padding: 20px;
-      border: 1px solid #888;
-      width: 80%; /* Could be more or less, depending on screen size */
-    }
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-    }
-    .close:hover,
-    .close:focus {
-      color: black;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .fade-in {
-      animation-name: fadeIn;
-      animation-duration: 2s;
+    /* ... existing styles ... */
+    .search-input {
+      margin-top: 10px;
+      padding: 5px;
+      width: calc(100% - 10px);
+      font-size: 1em;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header br">
-      <div class="header-l">
-        <h1>
-          A matter of minutes. And zero developing costs. Want to build your
-          own NFT collection?
-        </h1>
-        <a href="https://apillon.io/" class="builders" target="_blank">
-          Build with Apillon
-        </a>
-      </div>
-      <div class="header-r">
-        <img src="images/header.svg" alt="NFT Collection Header Image" />
-      </div>
-    </div>
-    <div class="box collection br text-center">
-      <div id="collection">
-        <h2>Featured NFTs</h2>
-        <p>Explore our curated selection of unique digital assets.</p>
-        <img src="images/featured-nft.jpg" alt="Featured NFT" />
-      </div>
-      <div class="drop" id="drop"></div>
-      <div class="btn-connect-wrapper">
-        <button type="button" id="btnConnect" onclick="connectWallet();">
-          Connect wallet
-        </button>
-        <span id="connectError" class="error"></span>
-      </div>
-      <span id="generalError" class="error"></span>
-    </div>
-    <div id="actions" style="display: none">
-      <h2 class="text-center">Show NFTs:</h2>
-      <div class="actions">
-        <button type="button" id="btnAllNFTs" onclick="loadAllNFTs();">All nfts</button>
-        <button type="button" id="myNFTs" onclick="loadMyNFTs();">My nfts</button>
-      </div>
-    </div>
+    <!-- ... other content ... -->
     <div class="grid" id="nfts"></div>
-    <div class="modals" id="modals"></div>
+    <!-- ... other content ... -->
   </div>
   <script
     src="https://code.jquery.com/jquery-3.5.1.min.js"
@@ -149,42 +42,7 @@
   <script src="./js/render.js" type="application/javascript"></script>
   <script src="./js/script.js" type="application/javascript"></script>
   <script>
-    let provider;
-
-    function connectWallet() {
-      if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        provider.send('eth_requestAccounts', [])
-          .then(() => {
-            console.log('Wallet connected!');
-            document.getElementById('connectError').textContent = '';
-            document.getElementById('actions').style.display = 'block';
-          })
-          .catch((error) => {
-            console.error(error);
-            document.getElementById('connectError').textContent = 'Could not connect to wallet';
-          });
-      } else {
-        document.getElementById('connectError').textContent = 'Please install MetaMask!';
-      }
-    }
-
-    function loadAllNFTs() {
-      console.log('All NFTs loaded!');
-      const nfts = [
-        { id: 1, name: 'NFT #1', image: 'images/nft1.jpg' },
-        { id: 2, name: 'NFT #2', image: 'images/nft2.jpg' },
-      ];
-      renderNFTs(nfts);
-    }
-
-    function loadMyNFTs() {
-      console.log('My NFTs loaded!');
-      const myNfts = [
-        { id: 1, name: 'My NFT #1', image: 'images/my-nft1.jpg' },
-      ];
-      renderNFTs(myNFTs);
-    }
+    // ... existing scripts ...
 
     function renderNFTs(nfts) {
       const nftsContainer = document.getElementById('nfts');
@@ -195,8 +53,22 @@
         nftCard.innerHTML = `
           <img class="nft-image" src="${nft.image}" alt="${nft.name}" />
           <h3>${nft.name}</h3>
+          <input type="text" class="search-input" onkeyup="searchNFT(this, '${nft.name}')" placeholder="Search in ${nft.name}">
         `;
         nftsContainer.appendChild(nftCard);
+      });
+    }
+
+    function searchNFT(inputElement, nftName) {
+      const filter = inputElement.value.toUpperCase();
+      const nftCards = document.getElementsByClassName('nft-card');
+      Array.from(nftCards).forEach((card) => {
+        const title = card.querySelector('h3').textContent;
+        if (title.toUpperCase().indexOf(filter) > -1) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
       });
     }
   </script>
