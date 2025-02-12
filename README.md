@@ -30,6 +30,13 @@ Example:
 ```sh
 export CONTRACT_ADDRESS="your_contract_address"
 export CHAIN_ID="0x507" # Replace with your chain ID
+
+# Example CHAIN IDS
+CHAIN_ID="0x507" # Moonbase
+CHAIN_ID="0x504" # Moonbeam
+CHAIN_ID="0x250" # Astar
+
+
 ./generate-config.sh
 ```
 
