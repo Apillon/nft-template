@@ -18,28 +18,22 @@ Once downloaded, the zip file includes all files you need to display your NFT co
 
 ## Configure
 
-Before the template can interact with the Smart Contract you have deployed via UI, it needs to be manually configured.
+Before the template can interact with the Smart Contract you have deployed via UI, it needs to be configured.
 
 To configure the template, do the following:
 
-1. Open the template folder "js"
-2. Locate env.js file within the js folder
-3. Open the env.js file in code editor
-4. Change the first line by entering your smart contract address between parenthesis
-5. Select the chain version by commenting and uncommenting the right chain
+1. Set the environment variables `CONTRACT_ADDRESS` and `CHAIN_ID` with your smart contract address and chain ID, respectively.
+2. Run the `generate-config.sh` script to automatically update the `env.js` file.
 
 Example:
 
 ```sh
-const contractAddress = ""; // Paste the address of the NFT collection between the parenthesis
-
-// uncomment the chain you are using by deleting the slashes
-// const chainId = "0x507"; // Moonbase
-// const chainId = "0x504"; // Moonbeam
-// const chainId = "0x250"; // Astar
+export CONTRACT_ADDRESS="your_contract_address"
+export CHAIN_ID="0x507" # Replace with your chain ID
+./generate-config.sh
 ```
 
-Once you have updated the js/env.js file, save it. Now the website files are ready to be deployed.
+Once you have updated the js/env.js file, the website files are ready to be deployed.
 ​
 
 ## Preview the website on your computer
