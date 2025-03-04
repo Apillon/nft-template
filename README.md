@@ -14,6 +14,7 @@ Once downloaded, the zip file includes all files you need to display your NFT co
 1. Fork the repo
 2. Configure js/env.js
 3. Make changes to the website (optional)
+4. Build the website using `build.sh` script
 4. Deploy files to Apillon hosting
 
 ## Configure
