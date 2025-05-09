@@ -119,70 +119,274 @@ async function getCurrentChain() {
 }
 
 async function addChain() {
-  if (chainId == 0x507) {
-    // moonbase
-    await ethereum.request({
-      method: "wallet_addEthereumChain",
-      params: [
-        {
-          chainId,
-          rpcUrls: ["https://rpc.api.moonbase.moonbeam.network/"],
-          chainName: "Moonbase",
-          nativeCurrency: {
-            name: "DEV",
-            symbol: "DEV",
-            decimals: 18,
-          },
-          blockExplorerUrls: ["https://moonbase.moonscan.io/"],
+  await ethereum.request({
+    method: "wallet_addEthereumChain",
+    params: [
+      getChainDetails(chainId),
+    ],
+  })
+
+}
+
+function getChainDetails(chainId) {
+  switch (chainId) {
+    case 1: {
+      // ethereum
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://ethereum.publicnode.com", "https://eth.llamarpc.com", "https://rpc.ankr.com/eth"],
+        chainName: "Ethereum",
+        nativeCurrency: {
+          name: "ETH",
+          symbol: "ETH",
+          decimals: 18
         },
-      ],
-    });
-  } else if (chainId == 0x504) {
-    // moonbeam
-    await ethereum.request({
-      method: "wallet_addEthereumChain",
-      params: [
-        {
-          chainId,
-          rpcUrls: ["https://rpc.api.moonbeam.network/"],
-          chainName: "Moonbeam",
-          nativeCurrency: {
-            name: "GLMR",
-            symbol: "GLMR",
-            decimals: 18,
-          },
-          blockExplorerUrls: ["https://moonscan.io/"],
+        blockExplorerUrls: ["https://etherscan.io/"]
+      }
+    }
+    case 11155111: {
+      // sepolia
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://rpc.sepolia.org", "https://rpc2.sepolia.org", "https://eth-sepolia.public.blastapi.io"],
+        chainName: "Sepolia",
+        nativeCurrency: {
+          name: "ETH",
+          symbol: "ETH",
+          decimals: 18
         },
-      ],
-    });
-  } else if (chainId == 0x250) {
-    // moonbeam
-    await ethereum.request({
-      method: "wallet_addEthereumChain",
-      params: [
-        {
-          chainId,
-          rpcUrls: ["https://evm.astar.network/"],
-          chainName: "Astar",
-          nativeCurrency: {
-            name: "ASTR",
-            symbol: "ASTR",
-            decimals: 18,
-          },
-          blockExplorerUrls: ["https://blockscout.com/astar"],
+        blockExplorerUrls: ["https://sepolia.etherscan.io/"]
+      }
+    }
+    case 1287: {
+      // moonbase
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://rpc.api.moonbase.moonbeam.network", "https://moonbase-alpha.public.blastapi.io", "https://moonbeam-alpha.api.onfinality.io/public"],
+        chainName: "Moonbase",
+        nativeCurrency: {
+          name: "DEV",
+          symbol: "DEV",
+          decimals: 18,
         },
-      ],
-    });
+        blockExplorerUrls: ["https://moonbase.moonscan.io/"]
+      }
+    }
+    case 1284: {
+      // moonbeam
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://rpc.api.moonbeam.network", "https://moonbeam.public.blastapi.io", "https://moonbeam.api.onfinality.io/public"],
+        chainName: "Moonbeam",
+        nativeCurrency: {
+          name: "GLMR",
+          symbol: "GLMR",
+          decimals: 18,
+        },
+        blockExplorerUrls: ["https://moonbeam.moonscan.io/"]
+      }
+    }
+    case 81: {
+      // astar shibuya testnet  
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://evm.shibuya.astar.network", "https://shibuya.public.blastapi.io", "https://shibuya-rpc.dwellir.com"],
+        chainName: "Shibuya Testnet",
+        nativeCurrency: {
+          name: "SBY",
+          symbol: "SBY",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://shibuya.subscan.io/"]
+      }
+    }
+    case 592: {
+      // astar
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://evm.astar.network", "https://astar.public.blastapi.io", "https://astar-rpc.dwellir.com"],
+        chainName: "Astar",
+        nativeCurrency: {
+          name: "ASTR",
+          symbol: "ASTR",
+          decimals: 18,
+        },
+        blockExplorerUrls: ["https://astar.blockscout.com/"]
+      }
+    }
+    case 44787: {
+      // celo alfajores testnet
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://alfajores-forno.celo-testnet.org", "https://alfajores-rpc.publicnode.com", "https://celo-alfajores.rpc.thirdweb.com"],
+        chainName: "Celo Alfajores",
+        nativeCurrency: {
+          name: "CELO",
+          symbol: "CELO",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://alfajores.celoscan.io/"]
+      }
+    }
+    case 42220: {
+      // celo
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://forno.celo.org", "https://rpc.ankr.com/celo", "https://celo-mainnet.rpc.thirdweb.com"],
+        chainName: "Celo",
+        nativeCurrency: {
+          name: "CELO",
+          symbol: "CELO",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://celoscan.io/"]
+      }
+    }
+    case 8453: {
+      // base
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://mainnet.base.org", "https://base.llamarpc.com", "https://base.blockpi.network/v1/rpc/public"],
+        chainName: "Base",
+        nativeCurrency: {
+          name: "ETH",
+          symbol: "ETH",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://basescan.org/"]
+      }
+    }
+    case 84532: {
+      // base sepolia
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://sepolia.base.org", "https://base-sepolia.blockpi.network/v1/rpc/public", "https://base-sepolia-rpc.publicnode.com"],
+        chainName: "Base Sepolia",
+        nativeCurrency: {
+          name: "ETH",
+          symbol: "ETH",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://sepolia.basescan.org/"]
+      }
+    }
+    case 42161: {
+      // arbitrum one
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://arb1.arbitrum.io/rpc", "https://arbitrum.llamarpc.com", "https://arbitrum-one.public.blastapi.io"],
+        chainName: "Arbitrum One",
+        nativeCurrency: {
+          name: "ETH",
+          symbol: "ETH",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://arbiscan.io/"]
+      }
+    }
+    case 421614: {
+      // arbitrum sepolia
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://sepolia-rollup.arbitrum.io/rpc", "https://arbitrum-sepolia.blockpi.network/v1/rpc/public", "https://arbitrum-sepolia.public.blastapi.io"],
+        chainName: "Arbitrum Sepolia",
+        nativeCurrency: {
+          name: "ETH",
+          symbol: "ETH",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://sepolia.arbiscan.io/"]
+      }
+    }
+    case 43114: {
+      // avalanche
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://api.avax.network/ext/bc/C/rpc", "https://avalanche.public-rpc.com", "https://avalanche-c-chain.publicnode.com"],
+        chainName: "Avalanche",
+        nativeCurrency: {
+          name: "AVAX",
+          symbol: "AVAX",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://snowtrace.io/"]
+      }
+    }
+    case 43113: {
+      // avalanche fuji
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc", "https://avalanche-fuji-c-chain.publicnode.com", "https://avalanche-fuji.blockpi.network/v1/rpc/public"],
+        chainName: "Avalanche Fuji",
+        nativeCurrency: {
+          name: "AVAX",
+          symbol: "AVAX",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://testnet.snowtrace.io/"]
+      }
+    }
+    case 10: {
+      // optimism
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://mainnet.optimism.io", "https://optimism.llamarpc.com", "https://optimism.blockpi.network/v1/rpc/public"],
+        chainName: "Optimism",
+        nativeCurrency: {
+          name: "ETH",
+          symbol: "ETH",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://optimistic.etherscan.io/"]
+      }
+    }
+    case 11155420: {
+      // optimism sepolia
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://sepolia.optimism.io", "https://optimism-sepolia.blockpi.network/v1/rpc/public", "https://optimism-sepolia.public.blastapi.io"],
+        chainName: "Optimism Sepolia",
+        nativeCurrency: {
+          name: "ETH",
+          symbol: "ETH",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://sepolia-optimism.etherscan.io/"]
+      }
+    }
+    case 137: {
+      // polygon
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://polygon-rpc.com", "https://polygon.llamarpc.com", "https://polygon.blockpi.network/v1/rpc/public"],
+        chainName: "Polygon",
+        nativeCurrency: {
+          name: "MATIC",
+          symbol: "MATIC",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://polygonscan.com/"]
+      }
+    }
+    case 80002: {
+      // polygon amoy 
+      return {
+        chainId: `0x${chainId.toString(16)}`,
+        rpcUrls: ["https://rpc.amoy.network", "https://polygon-amoy-rpc.publicnode.com", "https://polygon-amoy.blockpi.network/v1/rpc/public"],
+        chainName: "Polygon Amoy",
+        nativeCurrency: {
+          name: "MATIC",
+          symbol: "MATIC",
+          decimals: 18
+        },
+        blockExplorerUrls: ["https://amoy.polygonscan.com/"]
+      }
+    }
+    default: {
+      throw new Error("Chain not supported");
+    }
   }
 }
-
-async function switchChain() {
-  await ethereum.request({
-    method: "wallet_switchEthereumChain",
-    params: [{ chainId }], // chainId must be in HEX with 0x in front
-  });
-}
-
 async function getMyNftIDs(tokenAddress = null) {
   const nftIDs = [];
   try {
