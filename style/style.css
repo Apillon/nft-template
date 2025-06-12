@@ -35,11 +35,11 @@ body.lock {
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   grid-gap: 32px;
 }
 .grid.small {
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 .box {
   display: flex;
@@ -66,7 +66,7 @@ body.lock {
 }
 .drop {
   max-width: 500px;
-  margin: 1rem auto 0;
+  margin: 0 auto;
 }
 .field {
   margin-bottom: 8px;
@@ -94,50 +94,6 @@ body.lock {
 }
 .actions button {
   width: calc(50% - 1rem);
-}
-.mintNestable {
-  text-align: left;
-}
-.mintNestable input {
-  width: 100%;
-}
-.nestable .actions {
-  gap: 0.5rem 1rem;
-  margin-bottom: 0;
-}
-.nestable .actions button {
-  width: calc(50% - 0.5rem);
-}
-.nestable .error {
-  margin: -1rem auto 2rem;
-  text-align: center;
-}
-.nested-tokens {
-  min-width: 65vw;
-}
-.nestable-actions {
-  max-width: 500px;
-  margin: 50px auto;
-}
-.child-pending {
-  margin: 0 0 1rem;
-}
-.children {
-  display: flex;
-  overflow-x: auto;
-  gap: 1rem;
-}
-.children .box {
-  min-width: 140px;
-}
-.children .box-content {
-  padding: 0;
-}
-.flex-wrap {
-  flex-wrap: wrap;
-}
-.hidden {
-  display: none;
 }
 h1 {
   font-weight: 700;
@@ -238,63 +194,23 @@ button span {
   font-size: 12px;
 }
 
-.modal {
-  position: fixed;
-  width: 100vw;
-  height: 100dvh;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-  top: 0;
-  left: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.modal-container {
-  width: 100vw;
-  height: 100dvh;
-  overflow: hidden;
-  overflow-y: auto;
-  background: #f0f2da;
-  position: relative;
-}
-.modal-close {
-  position: absolute;
-  right: 15px;
-  top: 15px;
-  outline: none;
-  appearance: none;
-  color: red;
-  background: none;
-  border: 0px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.modal.open {
-  visibility: visible;
-  opacity: 1;
-  transition-delay: 0s;
-}
-.btn-modal-exit {
-  position: absolute;
-  display: inline-block;
-  width: auto;
-}
-.parent-token {
-  width: 80%;
-  max-width: 24rem;
-  margin: 0 auto;
-}
-
 .absolute {
   position: absolute;
 }
 .relative {
   position: relative;
 }
+.hidden {
+  display: none;
+}
+.inline-block {
+  display: inline-block;
+}
 .flex {
   display: flex;
+}
+.flex-wrap {
+  flex-wrap: wrap;
 }
 .justify-between {
   justify-content: space-between;
@@ -302,54 +218,10 @@ button span {
 .nowrap {
   white-space: nowrap;
 }
-
-.tags {
-  position: absolute;
-  top: 12px;
-  left: 0px;
-  display: flex;
-  flex-direction: column;
-}
-.tag {
-  padding: 2px 16px 2px 8px;
-  margin-bottom: 4px;
-  background-color: #78dce8;
-  clip-path: polygon(0 0, 100% 0%, 85% 100%, 0% 100%);
+.gap-2 {
+  gap: 0.5rem;
 }
 
-.pending-children {
-  position: absolute;
-  top: 12px;
-  right: 0px;
-  display: flex;
-  flex-direction: column;
-}
-.pending-child {
-  height: 24px;
-  padding: 2px 8px 2px 16px;
-  margin-bottom: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  background-color: #78dce8;
-  clip-path: polygon(0 0, 100% 0%, 100% 100%, 15% 100%);
-}
-.pending-child.disabled {
-  opacity: 0.8;
-  pointer-events: none;
-}
-
-.nesting {
-  margin: 50px 0;
-  gap: 50px;
-}
-.nesting .collection {
-  height: fit-content;
-}
-.nesting input[type='radio'] {
-  top: 10px;
-  right: 10px;
-  z-index: 1;
-}
 .nft {
   display: flex;
   flex-direction: column;
