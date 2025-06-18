@@ -88,7 +88,7 @@ export function renderMint() {
     `
     <div class="field-amount">
       <label for="amount">Number of tokens (1-5):</label>
-      <input id="amount" type="number" min="1" max="5" value="1" />
+      <input class="input" id="amount" type="number" min="1" max="5" value="1" />
     </div>
   `
   );
@@ -185,8 +185,8 @@ export async function renderNft(id: number, metadata: Nft) {
         <div class="box br relative" id="nft_${id}">
           <img src="${metadata.image}" alt="${metadata.name}" />
           <div class="box-content">
-            <h3>#${id} ${metadata.name}</h3>
-            <p>${metadata.description}</p>
+            <h3 class="h3">#${id} ${metadata.name}</h3>
+            <p class="p">${metadata.description}</p>
           </div>
         </div>
       `;

@@ -14,7 +14,7 @@
     <div class="container">
       <div class="header br">
         <div class="header-l">
-          <h1>A matter of minutes. And zero developing costs. Want to build your own NFT collection?</h1>
+          <h1 class="h1">A matter of minutes. And zero developing costs. Want to build your own NFT collection?</h1>
           <a href="https://apillon.io/" class="builders" target="_blank"> Build with Apillon </a>
         </div>
         <div class="header-r">
@@ -25,12 +25,12 @@
         <div id="collection"></div>
         <div class="drop" id="drop" style="display: none"></div>
         <div class="drop">
-          <button class="btn-mint" id="btnMint" style="display: none">Mint</button>
+          <button class="btn btn-mint" id="btnMint" style="display: none">Mint</button>
         </div>
         <div class="btn-connect-wrapper">
           <div class="flex gap-2">
             <div class="inline-block" id="wallet"></div>
-            <button class="inline-block" id="btnConnect">Connect wallet</button>
+            <button class="btn inline-block" id="btnConnect">Connect wallet</button>
           </div>
 
           <span id="connectError" class="error"></span>
@@ -39,7 +39,7 @@
       </div>
       <div id="actions" style="display: none">
         <div class="nestable-info">
-          <h3>The collection you are viewing supports nesting NFTs you own. To setup the nested relationship between NFTs, you first have to own them.</h3>
+          <h3 class="h3">The collection you are viewing supports nesting NFTs you own. To setup the nested relationship between NFTs, you first have to own them.</h3>
           <strong>Instructions:</strong>
           <ol>
             <li>Mint one or multiple NFTs</li>
@@ -51,8 +51,8 @@
         </div>
         <h2 class="text-center">Show NFTs:</h2>
         <div class="actions">
-          <button id="btnAllNFTs">All nfts</button>
-          <button id="myNFTs">My nfts</button>
+          <button class="btn" id="btnAllNFTs">All nfts</button>
+          <button class="btn" id="myNFTs">My nfts</button>
         </div>
       </div>
       <div class="grid" id="nfts"></div>

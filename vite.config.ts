@@ -5,7 +5,7 @@ import mkcert from 'vite-plugin-mkcert';
 export default defineConfig({
   build: {
     rollupOptions: {
-      external: ['vite-plugin-node-polyfills/shims/global'],
+      // external: ['vite-plugin-node-polyfills/shims/global'],
     },
   },
   plugins: [nodePolyfills(), mkcert()],

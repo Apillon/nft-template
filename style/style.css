@@ -95,7 +95,7 @@ body.lock {
 .actions button {
   width: calc(50% - 1rem);
 }
-h1 {
+.h1 {
   font-weight: 700;
   font-size: 18px;
   line-height: 28px;
@@ -103,31 +103,29 @@ h1 {
   margin-top: 8px;
   margin-bottom: 8px;
 }
-h3 {
+.h3 {
   font-weight: 700;
   font-size: 14px;
   line-height: 24px;
   margin-top: 0px;
   margin-bottom: 4px;
 }
-p {
+.p {
   margin-top: 0px;
   margin-bottom: 20px;
 }
 label {
   font-weight: bold;
 }
-input {
+.input {
   padding: 6px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-a {
-}
 img {
   max-width: 100%;
 }
-button {
+.btn {
   position: relative;
   width: 100%;
   height: 40px;
@@ -142,17 +140,17 @@ button {
   font-size: 13px;
   cursor: pointer;
 }
-button:hover {
+.btn:hover {
   animation-name: bounceIn;
   animation-duration: 50s;
 }
-button svg:not(.spinner) {
+.btn svg:not(.spinner) {
   position: absolute;
   left: 6px;
   top: 50%;
   transform: translate(0, -50%);
 }
-button span {
+.btn span {
   padding-left: 12px;
 }
 .btn-connect-wrapper {
@@ -228,12 +226,6 @@ button span {
   background: #ffffff;
   overflow: hidden;
   border-radius: 12px;
-}
-input[type='radio'] + label {
-  cursor: pointer;
-}
-input[type='radio']:checked + label .nft {
-  box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.35);
 }
 .nestable-nft .nft {
   max-width: 400px;

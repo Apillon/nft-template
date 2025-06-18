@@ -1,5 +1,5 @@
 import { EmbeddedEthersSigner, getEmbeddedWallet } from '@apillon/wallet-sdk';
-import { Contract, ethers, parseEther } from 'ethers6';
+import { Contract, ethers } from 'ethers6';
 import abi from './abi';
 import { btnLoader, checkInputAmount, hide, loadInfo, nftExistsCheckAndErrorRender, renderNft, transactionError, transactionStatus, writeToElement } from './render';
 import { CollectionInfo, Nft } from './types';
@@ -497,7 +497,7 @@ async function fetchNft(url: string) {
     if (!document.getElementById('nfts')?.textContent) {
       writeToElement(
         'nfts',
-        '<h3 class="text-center">Apologies, we were unable to load NFTs metadata at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
+        '<h3 class="h3 text-center">Apologies, we were unable to load NFTs metadata at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
       );
     }
   }
