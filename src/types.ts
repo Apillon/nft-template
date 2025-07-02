@@ -22,5 +22,6 @@ export type CollectionInfo = {
 declare global {
   interface Window {
     ethereum?: any;
+    embeddedWallet?: any;
   }
 }

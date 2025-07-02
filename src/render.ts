@@ -180,7 +180,7 @@ export function transactionError(msg: string, error: any) {
 
 export async function renderNft(id: number, metadata: Nft) {
   const e = document.getElementById('nfts');
-  if (e && metadata.name && metadata.image) {
+  if (e && metadata?.name && metadata?.image) {
     e.innerHTML += `
         <div class="box br relative" id="nft_${id}">
           <img src="${metadata.image}" alt="${metadata.name}" />

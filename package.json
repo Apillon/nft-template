@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@apillon/wallet-ui": "^3.0.0"
+    "@apillon/wallet-ui": "^3.0.3"
   },
   "devDependencies": {
     "ethers6": "npm:ethers@^6.13.5",

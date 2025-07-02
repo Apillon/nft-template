@@ -1,4 +1,4 @@
-import { DefaultEthereumNetworks, DefaultSubstrateNetworks, getEmbeddedWallet } from '@apillon/wallet-sdk';
+import { DefaultEthereumNetworks, getEmbeddedWallet } from '@apillon/wallet-sdk';
 import { EmbeddedWalletUI } from '@apillon/wallet-ui';
 import { connectWallet, loadAllNFTs, loadMyNFTs, mint, onWalletConnected } from './script';
 import { CHAIN_ID, EMBEDDED_WALLET_CLIENT, IMG_LOGO } from './config';
@@ -8,7 +8,6 @@ if (EMBEDDED_WALLET_CLIENT) {
     clientId: EMBEDDED_WALLET_CLIENT,
     defaultNetworkId: CHAIN_ID,
     networks: DefaultEthereumNetworks,
-    networksSubstrate: DefaultSubstrateNetworks,
   });
   initEW();
 }
