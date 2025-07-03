@@ -2,6 +2,7 @@ import { DefaultEthereumNetworks, getEmbeddedWallet } from '@apillon/wallet-sdk'
 import { EmbeddedWalletUI } from '@apillon/wallet-ui';
 import { connectWallet, loadAllNFTs, loadMyNFTs, mint, onWalletConnected } from './script';
 import { CHAIN_ID, EMBEDDED_WALLET_CLIENT, IMG_LOGO } from './config';
+import { closeModal, openModal } from './render';
 
 if (EMBEDDED_WALLET_CLIENT) {
   EmbeddedWalletUI('#wallet', {
@@ -34,7 +35,30 @@ async function initEW() {
   }
 }
 
+function openEW() {
+  const wallet = getEmbeddedWallet();
+  if (wallet) {
+    wallet.events.emit('open', true);
+    closeModal();
+  }
+}
+
+function connect(){
+  const wallet = getEmbeddedWallet();
+  if (wallet && wallet.getAddress()) {
+    wallet.events.emit('open', true);
+    closeModal();
+  } else {
+    openModal();
+  }
+}
+
+document.getElementById('btnModalWallet')?.addEventListener('click', () => connect());
+document.getElementById('btnModalExit')?.addEventListener('click', () => closeModal());
+document.getElementById('modalWalletBg')?.addEventListener('click', () => closeModal());
 document.getElementById('btnConnect')?.addEventListener('click', () => connectWallet());
+document.getElementById('btnConnectEW')?.addEventListener('click', () => openEW());
+document.getElementById('btnConnected')?.addEventListener('click', () => location.reload());
 document.getElementById('btnAllNFTs')?.addEventListener('click', () => loadAllNFTs());
 document.getElementById('myNFTs')?.addEventListener('click', () => loadMyNFTs());
 document.getElementById('btnMint')?.addEventListener('click', () => mint());

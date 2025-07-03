@@ -1,7 +1,7 @@
 import { EmbeddedEthersSigner, getEmbeddedWallet } from '@apillon/wallet-sdk';
 import { Contract, ethers } from 'ethers6';
 import abi from './abi';
-import { btnLoader, checkInputAmount, hide, loadInfo, nftExistsCheckAndErrorRender, renderNft, transactionError, transactionStatus, writeToElement } from './render';
+import { btnLoader, checkInputAmount, closeModal, hide, loadInfo, nftExistsCheckAndErrorRender, renderNft, show, transactionError, transactionStatus, writeToElement } from './render';
 import { CollectionInfo, Nft } from './types';
 import { metamaskNotSupportedMessage } from './utils';
 import { CHAIN_ID, CONTRACT_ADDRESS } from './config';
@@ -63,8 +63,11 @@ export async function connectWallet() {
   await window.ethereum.request({ method: 'eth_requestAccounts' });
   walletAddress = await signer.getAddress();
 
-  hide('wallet');
   await onWalletConnected();
+  hide('btnConnect')
+  hide('btnConnectEW')
+  show('btnConnected')
+  closeModal();
 }
 
 export async function onWalletConnected(ew = false) {
@@ -72,7 +75,6 @@ export async function onWalletConnected(ew = false) {
     init(ew);
     const wallet = getEmbeddedWallet();
     if (wallet) {
-      hide('btnConnect');
       walletAddress = wallet.getAddress();
     }
   }
@@ -89,7 +91,7 @@ export async function onWalletConnected(ew = false) {
   myNFTs = await getMyNftIDs();
 
   btnLoader(document.getElementById('btnConnect'), false);
-  writeToElement('btnConnect', iconWallet + '<span>' + walletAddress.slice(0, 11) + '</span>');
+  writeToElement('btnModalWallet', iconWallet + '&nbsp;<span>' + walletAddress.slice(0, 11) + '</span>');
   await loadAllNFTs();
 }
 
@@ -113,20 +115,17 @@ export async function mint() {
   try {
     const value = info.price * BigInt(amount);
     const gasLimit = await nftContract.mint.estimateGas(walletAddress, amount, { value });
-    console.log(gasLimit);
-    console.log((gasLimit * 11n) / 10n);
     const tx = await nftContract.mint(walletAddress, amount, {
       value,
       gasLimit: (gasLimit * 11n) / 10n,
     });
     const receipt = await tx.wait();
-    console.log(receipt);
     const logs = receipt?.logs || receipt.data?.logs;
 
     await refreshState();
     await addNftId(Number(logs[0]?.topics[3]));
   } catch (e) {
-    console.debug(e);
+    console.error(e);
     const defaultMsg = 'Token could not be minted! Check contract address.';
     const msg = transactionError(defaultMsg, e);
     transactionStatus(msg);
@@ -493,11 +492,11 @@ async function fetchNft(url: string) {
     const response = await fetch(url);
     return await response.json();
   } catch (e) {
-    console.debug(e);
+    console.error(e);
     if (!document.getElementById('nfts')?.textContent) {
       writeToElement(
         'nfts',
-        '<h3 class="h3 text-center">Apologies, we were unable to load NFTs metadata at this time. Please try again later or contact our support team for assistance. Thank you for your patience.</h3>'
+        '<h3 class="h3 text-center">Failed to load one or more NFTs metadata. Please try again later.</h3>'
       );
     }
   }

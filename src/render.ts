@@ -97,8 +97,8 @@ export function renderMint() {
 
 export function btnLoader(el?: HTMLElement | null, loading: boolean = false) {
   if (!el) return;
-  if (loading) {
-    el.setAttribute('data-text', el.textContent || '');
+  if (loading) {    
+    el.setAttribute('data-text', el.innerHTML || '');
     el.classList.add('loading');
     el.innerHTML = `
       <svg
@@ -123,7 +123,9 @@ export function btnLoader(el?: HTMLElement | null, loading: boolean = false) {
     `;
   } else {
     el.classList.remove('loading');
-    el.innerHTML = el.getAttribute('data-text') || '';
+    if(el.getAttribute('data-text')){      
+      el.innerHTML = el.getAttribute('data-text') || '';
+    }
   }
 }
 
@@ -213,5 +215,18 @@ export function writeToElement(id: string, html: string) {
   const e = document.getElementById(id);
   if (e) {
     e.innerHTML = html;
+  }
+}
+
+export function openModal(id: string|number = 'Wallet') {
+  if (document.getElementById(`modal${id}`)) {
+    document.getElementById(`modal${id}`)?.classList.add('open');
+    document.body.classList.add('lock');
+  }
+}
+export function closeModal(id: string|number = 'Wallet') {
+  if (document.getElementById(`modal${id}`)) {
+    document.getElementById(`modal${id}`)?.classList.remove('open');
+    document.body.classList.remove('lock');
   }
 }
