@@ -14,6 +14,11 @@ body {
 body.lock {
   overflow: hidden;
 }
+hr {
+  border-color: rgba(153, 153, 153, 0.64);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
 .container {
   max-width: 1440px;
   width: 100%;
@@ -35,11 +40,11 @@ body.lock {
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   grid-gap: 32px;
 }
 .grid.small {
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 .box {
   display: flex;
@@ -66,7 +71,7 @@ body.lock {
 }
 .drop {
   max-width: 500px;
-  margin: 1rem auto 0;
+  margin: 0 auto;
 }
 .field {
   margin-bottom: 8px;
@@ -95,51 +100,7 @@ body.lock {
 .actions button {
   width: calc(50% - 1rem);
 }
-.mintNestable {
-  text-align: left;
-}
-.mintNestable input {
-  width: 100%;
-}
-.nestable .actions {
-  gap: 0.5rem 1rem;
-  margin-bottom: 0;
-}
-.nestable .actions button {
-  width: calc(50% - 0.5rem);
-}
-.nestable .error {
-  margin: -1rem auto 2rem;
-  text-align: center;
-}
-.nested-tokens {
-  min-width: 65vw;
-}
-.nestable-actions {
-  max-width: 500px;
-  margin: 50px auto;
-}
-.child-pending {
-  margin: 0 0 1rem;
-}
-.children {
-  display: flex;
-  overflow-x: auto;
-  gap: 1rem;
-}
-.children .box {
-  min-width: 140px;
-}
-.children .box-content {
-  padding: 0;
-}
-.flex-wrap {
-  flex-wrap: wrap;
-}
-.hidden {
-  display: none;
-}
-h1 {
+.h1 {
   font-weight: 700;
   font-size: 18px;
   line-height: 28px;
@@ -147,31 +108,29 @@ h1 {
   margin-top: 8px;
   margin-bottom: 8px;
 }
-h3 {
+.h3 {
   font-weight: 700;
   font-size: 14px;
   line-height: 24px;
   margin-top: 0px;
   margin-bottom: 4px;
 }
-p {
+.p {
   margin-top: 0px;
   margin-bottom: 20px;
 }
 label {
   font-weight: bold;
 }
-input {
+.input {
   padding: 6px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-a {
-}
 img {
   max-width: 100%;
 }
-button {
+.btn {
   position: relative;
   width: 100%;
   height: 40px;
@@ -186,17 +145,17 @@ button {
   font-size: 13px;
   cursor: pointer;
 }
-button:hover {
+.btn:hover {
   animation-name: bounceIn;
   animation-duration: 50s;
 }
-button svg:not(.spinner) {
+.btn svg:not(.spinner) {
   position: absolute;
   left: 6px;
   top: 50%;
   transform: translate(0, -50%);
 }
-button span {
+.btn span {
   padding-left: 12px;
 }
 .btn-connect-wrapper {
@@ -217,6 +176,9 @@ button span {
   width: fit-content;
   min-width: 120px;
   margin-top: 0.5rem;
+}
+.btn-wallet {
+  width: 100%;
 }
 .builders {
   display: inline-block;
@@ -251,13 +213,23 @@ button span {
   align-items: center;
   justify-content: center;
 }
-.modal-container {
-  width: 100vw;
-  height: 100dvh;
+.modal-bg {
+  background-color: rgb(0 0 0 / 0.5);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+.modal-container {  
+  max-width: 48rem;
+  width: 100%;
+  max-height: 90vh;
+  padding: 2rem;
+  background-color: rgb(255 255 255 );
+  border-radius: 0.75rem;
+  position: relative;
+  z-index: 10;
   overflow: hidden;
   overflow-y: auto;
-  background: #f0f2da;
-  position: relative;
 }
 .modal-close {
   position: absolute;
@@ -278,13 +250,26 @@ button span {
 }
 .btn-modal-exit {
   position: absolute;
-  display: inline-block;
-  width: auto;
+  right: 0px;
+  top: 0px;
+  z-index: 2;
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  animation: none !important;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  padding: 0.25rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 400;
+  box-shadow: none;
+  border: none;
 }
-.parent-token {
-  width: 80%;
-  max-width: 24rem;
-  margin: 0 auto;
+.btn-modal-exit:after {
+  content: "\00D7";
 }
 
 .absolute {
@@ -293,8 +278,28 @@ button span {
 .relative {
   position: relative;
 }
+.hidden {
+  display: none;
+}
+.inline-block {
+  display: inline-block;
+}
+.inline-flex {
+  display: inline-flex;
+}
 .flex {
   display: flex;
+}
+.flex-cc {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.flex-col {
+  flex-direction: column;
+}
+.flex-wrap {
+  flex-wrap: wrap;
 }
 .justify-between {
   justify-content: space-between;
@@ -302,54 +307,20 @@ button span {
 .nowrap {
   white-space: nowrap;
 }
-
-.tags {
-  position: absolute;
-  top: 12px;
-  left: 0px;
-  display: flex;
-  flex-direction: column;
+.gap-2 {
+  gap: 0.5rem;
 }
-.tag {
-  padding: 2px 16px 2px 8px;
-  margin-bottom: 4px;
-  background-color: #78dce8;
-  clip-path: polygon(0 0, 100% 0%, 85% 100%, 0% 100%);
+.justify-center {
+  justify-content: center;
 }
-
-.pending-children {
-  position: absolute;
-  top: 12px;
-  right: 0px;
-  display: flex;
-  flex-direction: column;
+.items-center {
+  align-items: center;
 }
-.pending-child {
-  height: 24px;
-  padding: 2px 8px 2px 16px;
-  margin-bottom: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  background-color: #78dce8;
-  clip-path: polygon(0 0, 100% 0%, 100% 100%, 15% 100%);
-}
-.pending-child.disabled {
-  opacity: 0.8;
-  pointer-events: none;
+.my-4 {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
-.nesting {
-  margin: 50px 0;
-  gap: 50px;
-}
-.nesting .collection {
-  height: fit-content;
-}
-.nesting input[type='radio'] {
-  top: 10px;
-  right: 10px;
-  z-index: 1;
-}
 .nft {
   display: flex;
   flex-direction: column;
@@ -357,20 +328,19 @@ button span {
   overflow: hidden;
   border-radius: 12px;
 }
-input[type='radio'] + label {
-  cursor: pointer;
-}
-input[type='radio']:checked + label .nft {
-  box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.35);
-}
 .nestable-nft .nft {
   max-width: 400px;
   margin: 0 auto 0;
 }
-.nestable-info,
 .nft-transfer {
   max-width: 500px;
   margin: 50px auto;
+}
+
+#oaw-wallet-widget-btn {
+  visibility: hidden;
+  position: absolute;
+  z-index: -1;  
 }
 
 @media (min-width: 767px) {

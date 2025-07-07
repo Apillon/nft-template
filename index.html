@@ -2,66 +2,81 @@
 <html>
   <head>
     <title>NFTs</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-    <script src="./js/ethers-5.5.umd.min.js" type="application/javascript"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;700&display=swap" rel="stylesheet" />
     <link href="./style/style.css" rel="stylesheet" />
     <link href="./style/tooltip.css" rel="stylesheet" />
-    <script src="./js/abi.js" type="application/javascript" async></script>
-    <script src="./js/env.js" type="application/javascript" async></script>
-    <script src="./js/utils.js" type="application/javascript" async></script>
-    <script src="./js/render.js" type="application/javascript" async></script>
-    <script src="./js/script.js" type="application/javascript" async></script>
-    <script src="./js/nestable.js" type="application/javascript" async></script>
     <script></script>
   </head>
   <body>
     <div class="container">
       <div class="header br">
         <div class="header-l">
-          <h1>A matter of minutes. And zero developing costs. Want to build your own NFT collection?</h1>
+          <h1 class="h1">A matter of minutes. And zero developing costs. Want to build your own NFT collection?</h1>
           <a href="https://apillon.io/" class="builders" target="_blank"> Build with Apillon </a>
         </div>
         <div class="header-r">
-          <img src="images/header.svg" />
+          <img id="logoImg" src="images/header.svg" height="126" />
         </div>
       </div>
       <div class="box collection br text-center">
         <div id="collection"></div>
+        <div class="drop" id="drop" style="display: none"></div>
+        <div class="drop">
+          <button class="btn btn-mint" id="btnMint" style="display: none">Mint</button>
+        </div>
         <div class="btn-connect-wrapper">
-          <button id="btnConnect" onclick="connectWallet();">Connect wallet</button>
+          <div class="flex gap-2">
+            <div id="wallet"></div>
+            <button class="btn inline-block" id="btnModalWallet">Connect wallet</button>
+          </div>
           <span id="connectError" class="error"></span>
         </div>
         <span id="generalError" class="error"></span>
       </div>
-      <div id="actions" style="display: none">
-        <div
-        class="nestable-info"
-      >
-        <h3>
-          The collection you are viewing supports nesting NFTs you own. To setup the nested
-          relationship between NFTs, you first have to own them.
-        </h3>
-        <strong>Instructions:</strong>
-        <ol>
-          <li>Mint one or multiple NFTs</li>
-          <li>Once minted, click on “My NFTs”</li>
-          <li>The NFTs you own will be displayed</li>
-          <li>Click on the NFT you want to set as a parent</li>
-          <li>A window will open, allowing you to link child NFTs to that NFT</li>
-        </ol>
-      </div>
+      <div id="actions" style="display: none">        
         <h2 class="text-center">Show NFTs:</h2>
         <div class="actions">
-          <button id="btnAllNFTs" onclick="loadAllNFTs();">All nfts</button>
-          <button id="myNFTs" onclick="loadMyNFTs();">My nfts</button>
+          <button class="btn" id="btnAllNFTs">All nfts</button>
+          <button class="btn" id="myNFTs">My nfts</button>
         </div>
       </div>
       <div class="grid" id="nfts"></div>
-      <div class="modals" id="modals"></div>
+      <div class="modals" id="modals">
+        <div class="modal" id="modalWallet" >
+          <div class="modal-bg" id="modalWalletBg"></div>
+          <div class="modal-container">
+              <button class="btn-modal-exit" id="btnModalExit"></button>
+            <div class="container">        
+              <div class="relative text-center">
+                <h2 class="my-4">Your NFTs, delivered with style</h2>
+                <div>Email them. Airdrop them. Share a link. <br>No gas fees. No fuss.</div>
+                <hr />
+                <h4 class="my-4">Connect your wallet to get started:</h4>
+                <div class="flex flex-col gap-2">                  
+                  <button class="btn btn-wallet" id="btnConnectEW">
+                    <span class="inline-flex items-center gap-2">
+                      <img src="/images/ew.svg" width="20" height="20" alt="embeddedWallet" />
+                      <span class="inline-block">Apillon Embedded Wallet</span> 
+                    </span>                    
+                  </button>
+                  <button class="btn btn-wallet" id="btnConnect">
+                    <span class="inline-flex items-center gap-2">
+                      <img src="/images/metaMask.svg" width="20" height="20" alt="metamask" />
+                      <span>MetaMask</span>
+                    </span>
+                  </button>
+                  <button class="btn inline-block " id="btnConnected" style="display: none">Disconnect</button>
+                </div>
+              </div>     
+            </div>      
+          </div>
+          </div>
+      </div>
     </div>
+    <script src="./src/main.ts" type="module" async></script>
   </body>
 </html>
