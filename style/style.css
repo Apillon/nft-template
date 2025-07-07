@@ -249,7 +249,7 @@ img {
   transition-delay: 0s;
 }
 .btn-modal-exit {
-position: absolute;
+  position: absolute;
   right: 0px;
   top: 0px;
   z-index: 2;
@@ -269,7 +269,7 @@ position: absolute;
   border: none;
 }
 .btn-modal-exit:after {
-  content: '\00d7'; /* This will render the 'X' */
+  content: "\00D7";
 }
 
 .absolute {
